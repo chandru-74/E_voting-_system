@@ -38,6 +38,7 @@ public class SecurityConfig {
                                 "/webjars/**",
                                 "/images/**",
                                 "/static/**",
+                                "/favicon.svg",
                                 "/error",
                                 "/election-results",
                                 "/election-results/**",
