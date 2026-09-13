@@ -1,4 +1,4 @@
-package com.example.E_voting_System;
+package com.example.E_voting_System.devTools;
 
 import com.example.E_voting_System.util.AadhaarValidator;
 import java.util.Scanner;
