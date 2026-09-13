@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Secure voter authentication system">
+    <title>Voter Login - E-Voting System</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            padding: 1rem;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 450px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2.5rem 2rem;
+            box-shadow: var(--shadow-xl);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .auth-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .auth-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .auth-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-top: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            font-weight: 500;
+            font-size: 0.9rem;
+            letter-spacing: 0.3px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            font-size: 1rem;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            font-family: var(--font-family);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .form-input:invalid:not(:placeholder-shown) {
+            border-color: var(--error);
+        }
+
+        .error-message {
+            font-size: 0.85rem;
+            color: #fca5a5;
+            margin-top: 0.4rem;
+            display: none;
+        }
+
+        .form-input:invalid:not(:placeholder-shown) ~ .error-message {
+            display: block;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 0.95rem;
+            font-size: 1rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 0.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+        }
+
+        .submit-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .alert-box {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--error);
+            background: rgba(239, 68, 68, 0.1);
+            color: #fca5a5;
+            display: none;
+        }
+
+        .alert-box.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .info-text {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+
+        @media (max-width: 480px) {
+            .auth-card {
+                padding: 2rem 1.5rem;
+            }
+
+            .auth-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <span class="auth-icon" aria-hidden="true">🔐</span>
+            <h1 class="auth-title">Voter Login</h1>
+            <p class="auth-subtitle">Secure authentication for voting</p>
+        </div>
+
+        <!-- Error Alert -->
+        <div class="alert-box" th:if="${error}" th:text="${error}"></div>
+
+        <form action="/voter/login" method="post" novalidate>
+            <div class="form-group">
+                <label for="aadhaar" class="form-label">Aadhaar Number</label>
+                <input
+                        type="text"
+                        id="aadhaar"
+                        name="aadhaar"
+                        class="form-input"
+                        placeholder="Enter your 12-digit Aadhaar"
+                        pattern="[0-9]{12}"
+                        title="Aadhaar must be 12 digits"
+                        required
+                        aria-required="true"
+                        aria-describedby="aadhaar-error">
+                <span id="aadhaar-error" class="error-message">Please enter a valid 12-digit Aadhaar number</span>
+            </div>
+
+            <div class="form-group">
+                <label for="mobile" class="form-label">Mobile Number</label>
+                <input
+                        type="tel"
+                        id="mobile"
+                        name="mobile"
+                        class="form-input"
+                        placeholder="Enter your 10-digit mobile number"
+                        pattern="[0-9]{10}"
+                        title="Mobile must be 10 digits"
+                        required
+                        aria-required="true"
+                        aria-describedby="mobile-error">
+                <span id="mobile-error" class="error-message">Please enter a valid 10-digit mobile number</span>
+            </div>
+
+            <button type="submit" class="submit-btn" id="loginBtn">Send OTP</button>
+        </form>
+
+        <p class="info-text">
+            We'll send a one-time password to your registered mobile number for secure authentication.
+        </p>
+    </div>
+</div>
+
+<script>
+    const loginForm = document.querySelector('form');
+    const loginBtn = document.getElementById('loginBtn');
+    const alertBox = document.querySelector('.alert-box');
+
+    // Show error alert if it exists
+    if (alertBox.textContent.trim()) {
+        alertBox.classList.add('show');
+    }
+
+    loginForm.addEventListener('submit', function(e) {
+        const aadhaar = document.getElementById('aadhaar').value;
+        const mobile = document.getElementById('mobile').value;
+
+        // Basic validation
+        if (!/^\d{12}$/.test(aadhaar)) {
+            e.preventDefault();
+            alert('Please enter a valid 12-digit Aadhaar number');
+            return;
+        }
+
+        if (!/^\d{10}$/.test(mobile)) {
+            e.preventDefault();
+            alert('Please enter a valid 10-digit mobile number');
+            return;
+        }
+
+        loginBtn.disabled = true;
+        loginBtn.textContent = 'Sending OTP...';
+    });
+
+    // Clear alert on input
+    document.getElementById('aadhaar').addEventListener('focus', function() {
+        alertBox.classList.remove('show');
+    });
+</script>
+</body>
+</html>

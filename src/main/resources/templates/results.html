@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Live Results — Tamil Nadu E-Voting</title>
+    <script>
+        (function() {
+            var t = localStorage.getItem('tn-vote-theme');
+            if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+        })();
+    </script>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800;900&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap');
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'DM Sans', sans-serif; background: var(--bg-body,#f9f7f0); min-height: 100vh; }
+        .rs-scene { position: fixed; inset: 0; pointer-events: none; z-index: 0; background-image: radial-gradient(circle, rgba(200,150,12,0.07) 1px, transparent 1px); background-size: 28px 28px; mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, black 30%, transparent 100%); }
+        .rs-wrap { position: relative; z-index: 1; width: 100%; max-width: 720px; margin: 0 auto; padding: 2.5rem 1rem 4rem; }
+        .rs-card { background: var(--bg-card,#fff); border: 1px solid rgba(12,26,62,0.1); border-radius: 22px; box-shadow: 0 24px 60px rgba(12,26,62,0.11), 0 6px 18px rgba(12,26,62,0.06); overflow: hidden; animation: cardIn 500ms cubic-bezier(0.22,1,0.36,1) both; }
+        @keyframes cardIn { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+        .rs-stripe { height: 5px; background: linear-gradient(90deg, #FF671F 0% 33.3%, #fff 33.3% 66.6%, #046A38 66.6% 100%); }
+        .rs-body { padding: 2.5rem 2.25rem 2rem; }
+        .rs-kicker { font-family: 'Sora', sans-serif; font-size: 0.67rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: var(--text-4,#9ca3af); margin-bottom: 0.35rem; }
+        .rs-title { font-family: 'Sora', sans-serif; font-size: 1.55rem; font-weight: 800; color: var(--ink,#0c1a3e); letter-spacing: -0.025em; margin-bottom: 0.4rem; }
+        .rs-meta { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; font-size: 0.78rem; color: var(--text-4,#9ca3af); margin-bottom: 1.75rem; }
+        .rs-live-dot { display: inline-flex; align-items: center; gap: 0.4rem; background: #ecfdf5; border: 1px solid rgba(22,163,74,0.25); border-radius: 999px; padding: 0.25rem 0.7rem; font-family: 'Sora', sans-serif; font-size: 0.7rem; font-weight: 700; color: #15803d; }
+        .rs-live-dot::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #22c55e; animation: livePulse 2s ease-in-out infinite; }
+        @keyframes livePulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+        /* NEW: auto-refresh toggle */
+        .rs-refresh-toggle { display:inline-flex; align-items:center; gap:0.4rem; font-family:'Sora',sans-serif; font-size:0.72rem; font-weight:700; color:var(--text-4,#9ca3af); cursor:pointer; padding:0.25rem 0.6rem; border-radius:999px; border:1px solid var(--border,#e2e8f0); background:transparent; transition:all 150ms; }
+        .rs-refresh-toggle:hover { border-color:#1A3066; color:#1A3066; }
+        .rs-refresh-toggle.active { background:#ecfdf5; border-color:rgba(22,163,74,0.3); color:#15803d; }
+        .rs-countdown { font-family:'DM Mono',monospace; font-size:0.72rem; color:var(--text-4,#9ca3af); }
+        .rs-summary { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.75rem; }
+        .rs-stat { flex: 1; min-width: 130px; background: var(--surface,#f8fafc); border: 1px solid var(--border,#e2e8f0); border-radius: 12px; padding: 1rem 1.1rem; }
+        .rs-stat-lbl { font-family: 'Sora', sans-serif; font-size: 0.67rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-4,#9ca3af); margin-bottom: 0.3rem; }
+        .rs-stat-val { font-family: 'Sora', sans-serif; font-size: 1.5rem; font-weight: 900; color: var(--ink,#0c1a3e); line-height: 1; }
+        .rs-sec-lbl { display: flex; align-items: center; gap: 0.65rem; font-family: 'Sora', sans-serif; font-size: 0.67rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-4,#9ca3af); margin-bottom: 0.875rem; }
+        .rs-sec-lbl::after { content:''; flex:1; height:1px; background:var(--border,#e5e7eb); }
+        .rs-list { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem; }
+        .rs-row { border: 1px solid var(--border,#e5e7eb); border-radius: 14px; padding: 1.1rem 1.25rem; background: var(--bg-card,#fff); position: relative; overflow: hidden; animation: slideIn 400ms cubic-bezier(0.22,1,0.36,1) both; transition: box-shadow 200ms; }
+        .rs-row:nth-child(1){animation-delay:60ms} .rs-row:nth-child(2){animation-delay:120ms} .rs-row:nth-child(3){animation-delay:180ms} .rs-row:nth-child(4){animation-delay:240ms}
+        @keyframes slideIn { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:translateX(0)} }
+        .rs-row:hover { box-shadow: 0 4px 16px rgba(12,26,62,0.09); }
+        .rs-row.rs-leading { border-color: #d4a017; }
+        .rs-row.rs-leading::before { content: ''; position: absolute; left:0; top:0; bottom:0; width: 4px; background: linear-gradient(180deg, #FF6B1A, #d4a017); }
+        .rs-row-top { display: flex; align-items: center; gap: 0.85rem; margin-bottom: 0.75rem; }
+        .rs-symbol { width: 46px; height: 46px; border-radius: 10px; background: var(--surface,#f1f5f9); border: 1px solid var(--border,#e2e8f0); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; }
+        .rs-info { flex: 1; min-width: 0; }
+        .rs-cname { font-family: 'Sora', sans-serif; font-size: 0.97rem; font-weight: 800; color: var(--ink,#0c1a3e); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .rs-cparty { display: inline-flex; margin-top: 0.2rem; background: #0c1a3e; color: rgba(255,255,255,0.9); padding: 0.15rem 0.55rem; border-radius: 4px; font-family: 'Sora', sans-serif; font-size: 0.67rem; font-weight: 700; }
+        .rs-votes-val { font-family: 'Sora', sans-serif; font-size: 1.15rem; font-weight: 900; color: var(--ink,#0c1a3e); text-align: right; flex-shrink: 0; }
+        .rs-pct { font-family: 'DM Mono', monospace; font-size: 0.78rem; color: var(--text-4,#9ca3af); text-align: right; }
+        .rs-bar-track { height: 8px; background: var(--surface,#f1f5f9); border-radius: 999px; overflow: hidden; }
+        .rs-bar-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #1A3066, #3B5FC0); transition: width 1.2s cubic-bezier(0.22,1,0.36,1); }
+        .rs-row.rs-leading .rs-bar-fill { background: linear-gradient(90deg, #FF6B1A, #d4a017); }
+        .rs-badge-lead { display: inline-flex; align-items: center; gap: 0.3rem; background: linear-gradient(135deg, #FFF7DC, #FFEFC0); border: 1px solid rgba(200,150,12,0.35); border-radius: 999px; padding: 0.2rem 0.65rem; font-family: 'Sora', sans-serif; font-size: 0.68rem; font-weight: 700; color: #92610a; margin-left: 0.5rem; vertical-align: middle; }
+        /* NEW: bottom action row */
+        .rs-actions { display:flex; gap:0.75rem; margin-bottom:0; padding-top:1.25rem; border-top:1px solid var(--border,#f0f0f0); }
+        .rs-btn { flex:1; display:inline-flex; align-items:center; justify-content:center; gap:0.4rem; padding:0.75rem 1rem; border-radius:10px; font-family:'Sora',sans-serif; font-size:0.85rem; font-weight:700; cursor:pointer; transition:all 150ms; border:none; }
+        .rs-btn-outline { background:transparent; color:var(--ink,#0c1a3e); border:2px solid var(--border,#e2e8f0) !important; text-decoration:none; }
+        .rs-btn-outline:hover { border-color:#1A3066 !important; background:var(--surface,#f8fafc); }
+        .rs-btn-dark { background:linear-gradient(135deg,#1A3066,#060E1F); color:#fff; box-shadow:0 4px 14px rgba(12,26,62,0.3); text-decoration:none; }
+        .rs-btn-dark:hover { transform:translateY(-1px); box-shadow:0 8px 20px rgba(12,26,62,0.4); }
+        .rs-foot { padding-top: 1.25rem; text-align: center; font-size: 0.74rem; color: var(--text-4,#9ca3af); line-height: 2; }
+        @media (max-width: 560px) { .rs-body { padding: 1.75rem 1.1rem 1.5rem; } .rs-title { font-size: 1.3rem; } .rs-actions { flex-direction: column; } }
+    </style>
+</head>
+<body>
+
+<header class="ec-header">
+    <div class="ec-left">
+        <div class="ec-emblem">⚖️</div>
+        <div class="ec-brand">
+            <span class="ec-brand-main">தேர்தல் ஆணையம் · Election Commission</span>
+            <span class="ec-brand-sub">Tamil Nadu Legislative Assembly Election — 2026</span>
+        </div>
+    </div>
+    <div class="ec-right">
+        <div class="flag-pill"><span class="fp-s"></span><span class="fp-w"></span><span class="fp-g"></span></div>
+        <!-- CHANGED: was a POST /voter/logout form with a CSRF token.
+             Now a plain GET link to the homepage — no CSRF token needed
+             since navigating home doesn't change anything server-side. -->
+        <a th:href="@{/}" class="ec-chip link" style="text-decoration:none;">🏠 Home</a>
+    </div>
+</header>
+
+<div class="rs-scene" aria-hidden="true"></div>
+
+<div class="rs-wrap">
+    <div class="rs-card">
+        <div class="rs-stripe"></div>
+        <div class="rs-body">
+
+            <div class="rs-kicker">📊 Election Results</div>
+            <h1 class="rs-title">Live Vote Counts</h1>
+            <div class="rs-meta">
+                <span class="rs-live-dot">Live</span>
+                <span>Last updated: <strong th:text="${lastUpdated}">—</strong></span>
+                <span th:text="${voter != null ? voter.wardName : ''}"></span>
+                <!-- NEW: auto-refresh toggle -->
+                <button class="rs-refresh-toggle active" id="refreshToggle" title="Toggle auto-refresh">
+                    🔄 Auto-refresh: <span id="refreshLabel">ON</span>
+                    (<span class="rs-countdown" id="refreshCountdown">30s</span>)
+                </button>
+            </div>
+
+            <div class="rs-summary">
+                <div class="rs-stat">
+                    <div class="rs-stat-lbl">Total Votes Cast</div>
+                    <div class="rs-stat-val" th:text="${totalVotes}">0</div>
+                </div>
+                <div class="rs-stat">
+                    <div class="rs-stat-lbl">Candidates</div>
+                    <div class="rs-stat-val" th:text="${candidates != null ? candidates.size() : 0}">0</div>
+                </div>
+                <div class="rs-stat">
+                    <div class="rs-stat-lbl">Status</div>
+                    <div class="rs-stat-val" style="font-size:1rem;color:#15803d;">Counting</div>
+                </div>
+            </div>
+
+            <div class="rs-sec-lbl">Candidate Results</div>
+
+            <div class="rs-list" th:if="${candidates != null and !candidates.empty}">
+                <div th:each="c, stat : ${candidates}"
+                     th:classappend="${stat.index == 0} ? 'rs-leading' : ''"
+                     class="rs-row">
+                    <div class="rs-row-top">
+                        <div class="rs-symbol" th:text="${c.partySymbol}">🗳️</div>
+                        <div class="rs-info">
+                            <div class="rs-cname">
+                                <span th:text="${c.partyName}">Party</span>
+                                <span th:if="${stat.index == 0}" class="rs-badge-lead">🏆 Leading</span>
+                            </div>
+                            <span class="rs-cparty" th:text="${c.wardName}">Ward</span>
+                        </div>
+                        <div>
+                            <div class="rs-votes-val" th:text="${c.voteCount ?: 0}">0</div>
+                            <div class="rs-pct"
+                                 th:text="${totalVotes > 0}
+                                   ? ${#numbers.formatDecimal((c.voteCount ?: 0) * 100.0 / totalVotes, 1, 1) + '%'}
+                                   : '0.0%'">0.0%</div>
+                        </div>
+                    </div>
+                    <div class="rs-bar-track">
+                        <div class="rs-bar-fill"
+                             th:style="${totalVotes > 0}
+                               ? 'width: ' + ${(c.voteCount ?: 0) * 100 / totalVotes} + '%'
+                               : 'width: 0%'"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div th:if="${candidates == null or candidates.empty}"
+                 style="text-align:center;padding:3rem 1rem;color:#9ca3af;">
+                <div style="font-size:2.5rem;margin-bottom:0.75rem;">🗳️</div>
+                <div style="font-family:'Sora',sans-serif;font-weight:700;margin-bottom:0.4rem;">No votes yet</div>
+                <div style="font-size:0.875rem;">Results will appear once voting begins.</div>
+            </div>
+
+
+            <!-- CHANGED: label now reflects reality. /voter always routes correctly
+      (shows ballot if not voted, redirects to already-voted if voted) —
+      this just makes the button text match what will actually happen,
+      instead of always saying "Back to Ballot" even after voting. -->
+            <div class="rs-actions">
+                <a th:href="@{/voter}" class="rs-btn rs-btn-outline"
+                   th:text="${voter != null and voter.hasVoted} ? '🗳️ Vote Status' : '← Back to Ballot'">← Back to Ballot</a>
+                <a th:href="@{/}" class="rs-btn rs-btn-dark" style="width:100%;">🏠 Home</a>
+            </div>
+
+            <div class="rs-foot">
+                ⛓️ Verified on Blockchain &nbsp;·&nbsp;
+                📞 Helpline: <strong>1950</strong> &nbsp;·&nbsp;
+                Election Commission of Tamil Nadu
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/ui-features.js}"></script>
+<script>
+    // NEW: auto-refresh with toggle and countdown
+    (function () {
+      var autoRefresh  = true;
+      var countdown    = 30;
+      var toggleBtn    = document.getElementById('refreshToggle');
+      var countdownEl  = document.getElementById('refreshCountdown');
+      var labelEl      = document.getElementById('refreshLabel');
+
+      var handle = setInterval(function () {
+        if (!autoRefresh) return;
+        countdown--;
+        countdownEl.textContent = countdown + 's';
+        if (countdown <= 0) { location.reload(); }
+      }, 1000);
+
+      toggleBtn.addEventListener('click', function () {
+        autoRefresh = !autoRefresh;
+        if (autoRefresh) {
+          countdown = 30;
+          countdownEl.textContent = '30s';
+          labelEl.textContent = 'ON';
+          toggleBtn.classList.add('active');
+        } else {
+          labelEl.textContent = 'OFF';
+          countdownEl.textContent = '—';
+          toggleBtn.classList.remove('active');
+        }
+      });
+    })();
+</script>
+</body>
+</html>

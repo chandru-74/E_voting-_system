@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Track My Vote — Tamil Nadu E-Voting</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=DM+Sans:wght@400;500&family=DM+Mono:wght@400;500&display=swap');
+
+        body { font-family: 'DM Sans', sans-serif; background: #f8f9fd; min-height: 100vh; }
+
+        .tv-wrap {
+            display: flex; justify-content: center;
+            padding: 3rem 1rem 4rem;
+        }
+
+        .tv-card {
+            width: 100%; max-width: 520px;
+            background: #fff;
+            border: 1px solid #e2e6f0;
+            border-radius: 20px;
+            box-shadow: 0 24px 60px rgba(12,26,62,0.10), 0 6px 18px rgba(12,26,62,0.06);
+            overflow: hidden;
+            animation: cardIn 480ms cubic-bezier(0.22,1,0.36,1) both;
+        }
+        @keyframes cardIn { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+
+        .tv-stripe {
+            height: 4px;
+            background: linear-gradient(90deg, #FF671F 0% 33.3%, #fff 33.3% 66.6%, #046A38 66.6% 100%);
+        }
+
+        .tv-body { padding: 2.5rem 2.25rem 2rem; }
+
+        .tv-icon {
+            width: 64px; height: 64px;
+            background: linear-gradient(135deg, #0369A1, #0EA5E9);
+            border-radius: 18px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.7rem; margin: 0 auto 1.5rem;
+            box-shadow: 0 8px 24px rgba(14,165,233,0.4);
+        }
+
+        .tv-title {
+            font-family: 'Sora', sans-serif;
+            font-size: 1.5rem; font-weight: 800;
+            color: #0c1a3e; text-align: center;
+            margin-bottom: 0.4rem;
+        }
+        .tv-sub {
+            text-align: center; font-size: 0.875rem;
+            color: #6b7280; margin-bottom: 1.75rem; line-height: 1.6;
+        }
+
+        /* Search form */
+        .tv-form { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+        .tv-input {
+            flex: 1; padding: 0.85rem 1rem;
+            border: 1.5px solid #e2e6f0; border-radius: 10px;
+            font-family: 'DM Mono', monospace; font-size: 0.82rem;
+            color: #1e293b; background: #f8fafc;
+            outline: none; transition: border-color 200ms, box-shadow 200ms;
+        }
+        .tv-input:focus {
+            border-color: #0EA5E9;
+            box-shadow: 0 0 0 4px rgba(14,165,233,0.1);
+            background: #fff;
+        }
+        .tv-input::placeholder { color: #9ca3af; font-size: 0.78rem; }
+        .tv-btn {
+            padding: 0.85rem 1.25rem;
+            background: linear-gradient(135deg, #0369A1, #0EA5E9);
+            color: #fff; border: none; border-radius: 10px;
+            font-family: 'Sora', sans-serif; font-size: 0.85rem;
+            font-weight: 700; cursor: pointer;
+            box-shadow: 0 4px 14px rgba(14,165,233,0.4);
+            transition: transform 150ms, box-shadow 200ms;
+            white-space: nowrap;
+        }
+        .tv-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(14,165,233,0.5); }
+
+        /* Result box */
+        .tv-result {
+            background: #f0fdf4; border: 1px solid rgba(22,163,74,0.25);
+            border-radius: 12px; padding: 1.5rem;
+        }
+        .tv-result-head {
+            display: flex; align-items: center; gap: 0.5rem;
+            font-family: 'Sora', sans-serif; font-size: 0.85rem;
+            font-weight: 700; color: #15803d; margin-bottom: 1rem;
+        }
+        .tv-row {
+            display: flex; justify-content: space-between;
+            align-items: center; padding: 0.6rem 0;
+            border-bottom: 1px solid rgba(22,163,74,0.12);
+            font-size: 0.875rem;
+        }
+        .tv-row:last-child { border-bottom: none; }
+        .tv-row-lbl { color: #6b7280; font-weight: 500; }
+        .tv-row-val {
+            font-family: 'DM Mono', monospace; font-size: 0.78rem;
+            color: #1e293b; font-weight: 600;
+            word-break: break-all; text-align: right; max-width: 260px;
+        }
+
+        /* Message box */
+        .tv-msg {
+            background: #fff7ed; border: 1px solid rgba(234,88,12,0.25);
+            border-radius: 12px; padding: 1.25rem;
+            text-align: center; color: #9a3412;
+            font-size: 0.875rem; line-height: 1.6;
+        }
+
+        .tv-back {
+            display: block; text-align: center; margin-top: 1.5rem;
+            color: #0369A1; font-weight: 700; font-family: 'Sora', sans-serif;
+            font-size: 0.875rem; text-decoration: none;
+        }
+        .tv-back:hover { text-decoration: underline; }
+
+        @media (max-width: 480px) {
+            .tv-body { padding: 2rem 1.25rem 1.75rem; }
+            .tv-form { flex-direction: column; }
+            .tv-btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="ec-header">
+    <div class="ec-left">
+        <div class="ec-emblem">⚖️</div>
+        <div class="ec-brand">
+            <span class="ec-brand-main">தேர்தல் ஆணையம் · Election Commission</span>
+            <span class="ec-brand-sub">Vote Verification</span>
+        </div>
+    </div>
+    <div class="ec-right">
+        <div class="flag-pill"><span class="fp-s"></span><span class="fp-w"></span><span class="fp-g"></span></div>
+        <span class="ec-chip">🔒 Secure</span>
+    </div>
+</header>
+
+<div class="tv-wrap">
+    <div class="tv-card">
+        <div class="tv-stripe"></div>
+        <div class="tv-body">
+
+            <div class="tv-icon">🔍</div>
+            <h1 class="tv-title">Track My Vote</h1>
+            <p class="tv-sub">Enter your vote receipt hash to verify your vote was recorded on the blockchain.</p>
+
+            <!-- Search form -->
+            <form th:action="@{/api/vote/track-vote}" method="get" class="tv-form">
+                <input class="tv-input" type="text" name="hash"
+                       placeholder="Enter 64-character SHA-256 receipt hash"
+                       th:value="${param.hash}"
+                       maxlength="64" required/>
+                <button type="submit" class="tv-btn">🔍 Search</button>
+            </form>
+
+            <!-- Vote found -->
+            <div class="tv-result" th:if="${vote != null}">
+                <div class="tv-result-head">
+                    <span>✅</span>
+                    <span>Vote Found — Recorded on Blockchain</span>
+                </div>
+
+                <div class="tv-row">
+                    <span class="tv-row-lbl">Vote Hash</span>
+                    <span class="tv-row-val" th:text="${vote.voteHash}">—</span>
+                </div>
+                <div class="tv-row">
+                    <span class="tv-row-lbl">Voted At</span>
+                    <span class="tv-row-val"
+                          th:text="${#temporals.format(vote.votedAt, 'dd-MM-yyyy HH:mm:ss')}">—</span>
+                </div>
+                <div class="tv-row">
+                    <span class="tv-row-lbl">Status</span>
+                    <span class="tv-row-val" style="color:#15803d;font-weight:700;">✓ Confirmed</span>
+                </div>
+            </div>
+
+            <!-- Not found / no hash submitted -->
+            <div class="tv-msg" th:if="${message != null}">
+                ℹ️ <span th:text="${message}"></span>
+            </div>
+
+            <a href="/voter/login" class="tv-back">← Back to Voter Portal</a>
+
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/ui-features.js}"></script>
+</body>
+</html>

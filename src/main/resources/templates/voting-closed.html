@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Voting Closed — Tamil Nadu E-Voting</title>
+    <script>(function(){var t=localStorage.getItem('tn-vote-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})();</script>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800;900&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Mono:wght@400;500;600&display=swap');
+        :root{--navy:#060E1F;--navy-3:#1A3066;--fire:#FF671F;--fire-2:#C94A00;--green:#046A38;--ink:#060E1F;--muted:#718096;--faint:#a0aec0;--surface:#f7f8fc;--card:#ffffff;--border:#e2e8f0}
+        [data-theme="dark"]{--ink:#f0f4ff;--muted:#94a3b8;--faint:#64748b;--surface:#0a1428;--card:#0f1d3a;--border:#1e3058}
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:'DM Sans',sans-serif;background:var(--surface);min-height:100vh;display:flex;flex-direction:column;color:var(--ink)}
+        .bg-mesh{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 70% 50% at 15% 20%,rgba(26,48,102,0.08) 0%,transparent 60%),radial-gradient(ellipse 60% 50% at 85% 80%,rgba(255,103,31,0.06) 0%,transparent 60%);}
+        .bg-dots{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:radial-gradient(circle,rgba(26,48,102,0.06) 1px,transparent 1px);background-size:32px 32px;}
+        .ec-header{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:0.875rem 2rem;background:rgba(6,14,31,0.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,0.07)}
+        .ec-left{display:flex;align-items:center;gap:0.875rem}
+        .ec-brand-main{display:block;font-family:'Sora',sans-serif;font-size:0.82rem;font-weight:700;color:rgba(255,255,255,0.95)}
+        .ec-brand-sub{display:block;font-size:0.7rem;color:rgba(255,255,255,0.45);margin-top:0.1rem}
+        .flag-pill{display:flex;height:18px;border-radius:3px;overflow:hidden;border:1px solid rgba(255,255,255,0.2)}
+        .fp-s,.fp-w,.fp-g{width:20px}.fp-s{background:#FF9933}.fp-w{background:#fff}.fp-g{background:#138808}
+        .ec-right{display:flex;align-items:center;gap:0.875rem}
+        .logout-chip{display:inline-flex;align-items:center;gap:0.4rem;padding:0.4rem 0.875rem;border-radius:999px;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.7);font-family:'Sora',sans-serif;font-size:0.75rem;font-weight:600;background:transparent;cursor:pointer;transition:all 200ms;}
+        .logout-chip:hover{background:rgba(255,255,255,0.08);color:#fff;border-color:rgba(255,255,255,0.3)}
+        .page-body{position:relative;z-index:1;flex:1;display:flex;align-items:center;justify-content:center;padding:2rem 1rem}
+        .vc-card{width:100%;max-width:520px;background:var(--card);border:1px solid var(--border);border-radius:24px;box-shadow:0 24px 64px rgba(6,14,31,0.13),0 6px 20px rgba(6,14,31,0.07);overflow:hidden;animation:cardIn 550ms cubic-bezier(0.22,1,0.36,1) both;}
+        @keyframes cardIn{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+        .stripe{height:4px;background:linear-gradient(90deg,#FF671F 0% 33.3%,#fff 33.3% 66.6%,#046A38 66.6% 100%)}
+        .card-body{padding:2.75rem 2.5rem 2.25rem;text-align:center}
+        .icon-wrap{position:relative;width:80px;height:80px;margin:0 auto 2rem;display:flex;align-items:center;justify-content:center}
+        .icon-ring1{position:absolute;inset:0;border-radius:50%;border:2px solid rgba(26,48,102,0.2);animation:ringP 3s ease-in-out infinite}
+        .icon-ring2{position:absolute;inset:-8px;border-radius:50%;border:1px dashed rgba(26,48,102,0.12);animation:ringP 3s ease-in-out infinite .8s}
+        @keyframes ringP{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.06)}}
+        .icon-inner{width:66px;height:66px;border-radius:50%;background:linear-gradient(135deg,rgba(26,48,102,0.1),rgba(26,48,102,0.05));border:1.5px solid rgba(26,48,102,0.18);display:flex;align-items:center;justify-content:center;font-size:2rem;animation:popIn 600ms cubic-bezier(0.22,1,0.36,1) 200ms both}
+        @keyframes popIn{from{opacity:0;transform:scale(0.4)}to{opacity:1;transform:scale(1)}}
+        .vc-kicker{font-family:'Sora',sans-serif;font-size:0.67rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:var(--faint);margin-bottom:0.4rem}
+        .vc-title{font-family:'Sora',sans-serif;font-size:1.55rem;font-weight:800;color:var(--ink);letter-spacing:-0.025em;margin-bottom:0.5rem}
+        .vc-msg{font-size:0.9rem;color:var(--muted);line-height:1.65;margin-bottom:2rem}
+        .vc-msg strong{color:var(--ink);font-weight:600}
+        .countdown-grid{display:flex;gap:0.75rem;justify-content:center;margin-bottom:1.75rem}
+        .cd-block{flex:1;max-width:80px;background:linear-gradient(135deg,var(--navy),var(--navy-3));border-radius:14px;padding:1rem 0.5rem;display:flex;flex-direction:column;align-items:center;gap:0.35rem;}
+        .cd-num{font-family:'DM Mono',monospace;font-size:1.75rem;font-weight:600;color:#fff;line-height:1}
+        .cd-lbl{font-family:'Sora',sans-serif;font-size:0.6rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.45)}
+        .status-badge{display:inline-flex;align-items:center;gap:0.5rem;padding:0.5rem 1.1rem;border-radius:999px;font-family:'Sora',sans-serif;font-size:0.78rem;font-weight:700;margin-bottom:1.75rem;}
+        .badge-closed{background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.2);color:#dc2626}
+        .badge-upcoming{background:rgba(26,48,102,0.08);border:1px solid rgba(26,48,102,0.2);color:var(--navy-3)}
+        .badge-dot{width:7px;height:7px;border-radius:50%;animation:dotP 2s ease-in-out infinite}
+        .badge-closed .badge-dot{background:#dc2626}
+        .badge-upcoming .badge-dot{background:var(--fire)}
+        @keyframes dotP{0%,100%{opacity:1}50%{opacity:.3}}
+        .info-box{background:linear-gradient(135deg,rgba(26,48,102,0.05),rgba(26,48,102,0.02));border:1px solid rgba(26,48,102,0.12);border-left:3px solid var(--navy-3);border-radius:10px;padding:1rem 1.1rem;margin-bottom:1.5rem;text-align:left;font-size:0.855rem;color:var(--muted);line-height:1.6;}
+        .info-box strong{display:block;font-family:'Sora',sans-serif;font-size:0.78rem;font-weight:700;color:var(--navy-3);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:0.3rem}
+        .voter-strip{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem;margin-bottom:1.5rem;text-align:left;}
+        .vs-label{font-family:'Sora',sans-serif;font-size:0.67rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--faint);margin-bottom:0.15rem}
+        .vs-value{font-family:'Sora',sans-serif;font-size:0.9rem;font-weight:700;color:var(--ink)}
+        .btn-logout{width:100%;padding:0.875rem;border-radius:10px;border:2px solid var(--border);background:transparent;color:var(--muted);font-family:'Sora',sans-serif;font-size:0.875rem;font-weight:700;cursor:pointer;transition:all 200ms;}
+        .btn-logout:hover{background:var(--surface);border-color:var(--navy-3);color:var(--navy-3)}
+        .vc-foot{margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--border);font-size:0.74rem;color:var(--faint);line-height:2}
+        @media(max-width:500px){.card-body{padding:2rem 1.25rem 1.75rem}.cd-num{font-size:1.4rem}.countdown-grid{gap:0.5rem}}
+    </style>
+</head>
+<body>
+<div class="bg-mesh" aria-hidden="true"></div>
+<div class="bg-dots" aria-hidden="true"></div>
+
+<header class="ec-header">
+    <div class="ec-left">
+        <div style="font-size:1.4rem">⚖️</div>
+        <div class="ec-brand">
+            <span class="ec-brand-main">தேர்தல் ஆணையம் · Election Commission of Tamil Nadu</span>
+            <span class="ec-brand-sub">Tamil Nadu Legislative Assembly Election — 2026</span>
+        </div>
+    </div>
+    <div class="ec-right">
+        <div class="flag-pill"><span class="fp-s"></span><span class="fp-w"></span><span class="fp-g"></span></div>
+        <form th:action="@{/voter/logout}" method="post" style="margin:0;display:inline;">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <button type="submit" class="logout-chip">Logout ↩</button>
+        </form>
+    </div>
+</header>
+
+<div class="page-body">
+    <div class="vc-card">
+        <div class="stripe"></div>
+        <div class="card-body">
+
+            <div class="icon-wrap" aria-hidden="true">
+                <div class="icon-ring2"></div>
+                <div class="icon-ring1"></div>
+                <div class="icon-inner">🗳️</div>
+            </div>
+
+            <div class="voter-strip" th:if="${voter != null}">
+                <div>
+                    <div class="vs-label">Logged in as</div>
+                    <div class="vs-value" th:text="${voter.name}">Voter</div>
+                </div>
+                <div style="text-align:right">
+                    <div class="vs-label">Ward</div>
+                    <div class="vs-value" th:text="${voter.wardName}">—</div>
+                </div>
+            </div>
+
+            <div class="vc-kicker">Voting Status</div>
+            <h1 class="vc-title" id="statusTitle">Voting Window</h1>
+
+            <div class="status-badge badge-upcoming" id="statusBadge">
+                <span class="badge-dot"></span>
+                <span id="badgeText">Loading…</span>
+            </div>
+
+            <p class="vc-msg" th:text="${windowMessage}">Voting has not been scheduled yet.</p>
+
+            <div class="countdown-grid" id="countdownGrid" style="display:none">
+                <div class="cd-block"><div class="cd-num" id="cdDays">00</div><div class="cd-lbl">Days</div></div>
+                <div class="cd-block"><div class="cd-num" id="cdHours">00</div><div class="cd-lbl">Hours</div></div>
+                <div class="cd-block"><div class="cd-num" id="cdMins">00</div><div class="cd-lbl">Mins</div></div>
+                <div class="cd-block"><div class="cd-num" id="cdSecs">00</div><div class="cd-lbl">Secs</div></div>
+            </div>
+
+            <div class="info-box">
+                <strong>🏛️ &nbsp;What happens next?</strong>
+                Once the voting window opens, log back in with your Aadhaar and mobile to cast your vote.
+                Your session is secure and your identity has been verified.
+            </div>
+
+            <form th:action="@{/voter/logout}" method="post" style="margin:0;">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <button type="submit" class="btn-logout">← Logout</button>
+            </form>
+
+            <div class="vc-foot">
+                📞 Election Helpline: <strong style="color:var(--muted)">1950</strong> (Toll-free) &nbsp;·&nbsp; Election Commission of Tamil Nadu
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    (function(){
+      'use strict';
+      var badge     = document.getElementById('statusBadge');
+      var badgeText = document.getElementById('badgeText');
+      var title     = document.getElementById('statusTitle');
+      var msgText   = document.querySelector('.vc-msg') ? document.querySelector('.vc-msg').textContent : '';
+
+      if (msgText.indexOf('closed') !== -1 || msgText.indexOf('ended') !== -1) {
+        badge.className = 'status-badge badge-closed';
+        badgeText.textContent = 'Voting Closed';
+        title.textContent = 'Voting Has Closed';
+      } else if (msgText.indexOf('not been scheduled') !== -1) {
+        badge.className = 'status-badge badge-upcoming';
+        badgeText.textContent = 'Not Scheduled';
+        title.textContent = 'Not Yet Scheduled';
+      } else {
+        badge.className = 'status-badge badge-upcoming';
+        badgeText.textContent = 'Opens Soon';
+        title.textContent = 'Voting Opens Soon';
+        startCountdown();
+      }
+
+      function startCountdown() {
+        var grid   = document.getElementById('countdownGrid');
+        var target = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        grid.style.display = 'flex';
+        function tick() {
+          var diff = Math.max(0, target - new Date());
+          document.getElementById('cdDays').textContent  = String(Math.floor(diff / 86400000)).padStart(2,'0');
+          document.getElementById('cdHours').textContent = String(Math.floor((diff % 86400000) / 3600000)).padStart(2,'0');
+          document.getElementById('cdMins').textContent  = String(Math.floor((diff % 3600000) / 60000)).padStart(2,'0');
+          document.getElementById('cdSecs').textContent  = String(Math.floor((diff % 60000) / 1000)).padStart(2,'0');
+          if (diff <= 0) { clearInterval(t); location.reload(); }
+        }
+        tick();
+        var t = setInterval(tick, 1000);
+      }
+
+      setInterval(function(){ location.reload(); }, 60000);
+    })();
+</script>
+</body>
+</html>

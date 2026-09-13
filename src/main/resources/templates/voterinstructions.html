@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Voter Eligibility &amp; Instructions — Tamil Nadu E-Voting System</title>
+  <script>
+    (function(){
+      var t=localStorage.getItem('tn-vote-theme');
+      if(t==='dark')document.documentElement.setAttribute('data-theme','dark');
+    })();
+  </script>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800;900&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Sans+Tamil:wght@400;500;600;700&display=swap');
+
+    :root {
+      --navy:#060E1F; --navy-3:#1A3066;
+      --fire:#FF671F; --fire-2:#C94A00;
+      --green:#046A38; --gold:#C8960C;
+      --ink:#060E1F; --muted:#718096; --faint:#a0aec0;
+      --surface:#f7f8fc; --card:#ffffff; --border:#e2e8f0;
+      --shadow:0 20px 60px rgba(6,14,31,0.12),0 6px 20px rgba(6,14,31,0.07);
+    }
+    [data-theme="dark"] {
+      --ink:#f0f4ff; --muted:#94a3b8; --faint:#64748b;
+      --surface:#0a1428; --card:#0f1d3a; --border:#1e3058;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'DM Sans',sans-serif;background:var(--surface);min-height:100vh;color:var(--ink);display:flex;flex-direction:column}
+    [lang="ta"]{font-family:'Noto Sans Tamil','DM Sans',sans-serif}
+
+    .bg-mesh{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 70% 50% at 10% 10%,rgba(255,103,31,0.07) 0%,transparent 60%),radial-gradient(ellipse 60% 50% at 90% 90%,rgba(4,106,56,0.06) 0%,transparent 60%)}
+
+    .page-body{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align-items:center;padding:3rem 1.5rem}
+    .wrap{width:100%;max-width:720px}
+
+    .top-row{display:flex;align-items:center;gap:.75rem;margin-bottom:1.5rem;flex-wrap:wrap}
+
+    .lang-toggle-row{display:flex;justify-content:center;margin-top:1.75rem;animation:fadeUp 600ms 140ms ease both}
+
+    .back-link{
+      display:inline-flex;align-items:center;gap:.4rem;
+      padding:.6rem 1.25rem;border-radius:8px;
+      background:#1A3066;color:#fff;border:1.5px solid #1A3066;
+      font-family:'Sora',sans-serif;font-size:.82rem;font-weight:700;
+      text-decoration:none;transition:all 150ms;
+    }
+    .back-link:hover{background:#122148;border-color:#122148;transform:translateY(-1px)}
+    .back-link:active{transform:translateY(0) scale(0.97)}
+
+    .lang-toggle{
+      display:inline-flex;border-radius:8px;overflow:hidden;
+      border:1.5px solid var(--border);
+    }
+    .lang-toggle button{
+      font-family:'Sora',sans-serif;font-size:.78rem;font-weight:700;
+      padding:.55rem 1rem;border:none;background:var(--card);color:var(--muted);
+      cursor:pointer;transition:background 150ms,color 150ms;
+    }
+    .lang-toggle button.active{background:var(--fire);color:#fff}
+
+    .ta{display:none}
+    body.lang-ta .en{display:none}
+    body.lang-ta .ta{display:inline}
+    body.lang-ta li .ta{display:block;margin-top:.2rem}
+
+    .hero{text-align:center;margin-bottom:2rem;animation:fadeUp 500ms ease both}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+    .hero-badge{display:inline-flex;align-items:center;gap:0.5rem;background:rgba(255,103,31,0.08);border:1px solid rgba(255,103,31,0.2);border-radius:999px;padding:0.35rem 0.9rem;font-family:'Sora',sans-serif;font-size:0.7rem;font-weight:700;color:var(--fire-2);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:1.1rem}
+    .hero h1{font-family:'Sora',sans-serif;font-size:1.85rem;font-weight:800;letter-spacing:-0.03em;margin-bottom:0.6rem}
+    .hero h1 span{color:var(--fire)}
+    .hero p{font-size:0.92rem;color:var(--muted);line-height:1.6}
+
+    .info-card{
+      background:var(--card);border:1px solid var(--border);border-radius:16px;
+      padding:1.75rem 2rem;box-shadow:var(--shadow);margin-bottom:1.5rem;
+      animation:fadeUp 550ms 80ms ease both;
+    }
+    .info-card h2{
+      font-family:'Sora',sans-serif;font-size:1.1rem;font-weight:800;
+      margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;
+      color:var(--fire);
+    }
+    .info-card ul{padding-left:1.2rem;display:flex;flex-direction:column;gap:.65rem}
+    .info-card li{font-size:.88rem;color:var(--muted);line-height:1.5}
+    .info-card li strong{color:var(--ink)}
+    .info-card li .ta{font-size:.86rem;color:var(--muted)}
+
+    .cta-row{display:flex;gap:.9rem;flex-wrap:wrap;justify-content:center;margin-top:1rem;animation:fadeUp 600ms 120ms ease both}
+    .cta-btn{
+      display:inline-flex;align-items:center;gap:.5rem;
+      padding:.75rem 1.5rem;border-radius:10px;
+      font-family:'Sora',sans-serif;font-size:.85rem;font-weight:700;
+      text-decoration:none;transition:transform 150ms,box-shadow 150ms;
+    }
+    .cta-btn:hover{transform:translateY(-2px)}
+    .cta-btn.voter{background:var(--fire);color:#fff}
+    .cta-btn.login{background:var(--navy-3);color:#fff}
+
+    .foot{margin-top:2.5rem;text-align:center;font-size:0.78rem;color:var(--faint);line-height:1.8}
+  </style>
+</head>
+<body>
+<div class="bg-mesh" aria-hidden="true"></div>
+
+<header class="ec-header">
+  <div class="ec-left">
+    <div class="ec-emblem">⚖️</div>
+    <div class="ec-brand">
+      <span class="ec-brand-main">தேர்தல் ஆணையம் · Election Commission of Tamil Nadu</span>
+      <span class="ec-brand-sub">Tamil Nadu Legislative Assembly Election — 2026</span>
+    </div>
+  </div>
+  <div class="flag-pill"><span class="fp-s"></span><span class="fp-w"></span><span class="fp-g"></span></div>
+</header>
+
+<div class="page-body">
+  <div class="wrap">
+
+    <div class="hero">
+      <div class="hero-badge">
+        <span class="en">🗳️ Read Before You Vote</span>
+        <span class="ta">🗳️ வாக்களிப்பதற்கு முன் படிக்கவும்</span>
+      </div>
+      <h1>
+        <span class="en">Voter Eligibility &amp; <span>Instructions</span></span>
+        <span class="ta">வாக்காளர் தகுதி மற்றும் <span>வழிமுறைகள்</span></span>
+      </h1>
+      <p>
+        <span class="en">Please review the rules below before registering or casting your vote.</span>
+        <span class="ta">பதிவு செய்வதற்கு முன் அல்லது வாக்களிப்பதற்கு முன் கீழே உள்ள விதிகளை மதிப்பாய்வு செய்யவும்.</span>
+      </p>
+    </div>
+
+    <div class="info-card">
+      <h2>
+        <span class="en">🗳️ For Voters</span>
+        <span class="ta">🗳️ வாக்காளர்களுக்கு</span>
+      </h2>
+      <ul>
+        <li>
+          <span class="en"><strong>Minimum age:</strong> 18 years or older.</span>
+          <span class="ta"><strong>குறைந்தபட்ச வயது:</strong> 18 வயது அல்லது அதற்கு மேல்.</span>
+        </li>
+        <li>
+          <span class="en"><strong>Required at registration:</strong> Aadhaar number and a valid mobile number for OTP verification.</span>
+          <span class="ta"><strong>பதிவுக்குத் தேவையானவை:</strong> ஆதார் எண் மற்றும் OTP சரிபார்ப்புக்கான செல்லுபடியாகும் மொபைல் எண்.</span>
+        </li>
+        <li>
+          <span class="en"><strong>Approval required:</strong> your registration is reviewed before you're allowed to vote. You'll be notified once approved.</span>
+          <span class="ta"><strong>ஒப்புதல் அவசியம்:</strong> நீங்கள் வாக்களிக்கும் முன் உங்கள் பதிவு மதிப்பாய்வு செய்யப்படும். ஒப்புதல் கிடைத்தவுடன் உங்களுக்கு அறிவிக்கப்படும்.</span>
+        </li>
+        <li>
+          <span class="en"><strong>One vote per voter:</strong> each approved voter can cast exactly one vote, for one ward, during the official voting window.</span>
+          <span class="ta"><strong>ஒரு வாக்காளருக்கு ஒரு வாக்கு:</strong> ஒப்புதல் பெற்ற ஒவ்வொரு வாக்காளரும், அதிகாரப்பூர்வ வாக்களிப்பு காலத்தில், ஒரு வார்டிற்கு சரியாக ஒரு வாக்கு மட்டுமே அளிக்க முடியும்.</span>
+        </li>
+        <li>
+          <span class="en"><strong>Voting window:</strong> voting is only open during the period set by the Election Commission — check the E-Voting page or your dashboard for the current status.</span>
+          <span class="ta"><strong>வாக்களிப்பு காலம்:</strong> தேர்தல் ஆணையம் நிர்ணயித்த காலத்தில் மட்டுமே வாக்களிப்பு திறந்திருக்கும் — தற்போதைய நிலையை அறிய E-Voting பக்கத்தை அல்லது உங்கள் டாஷ்போர்டைப் பார்க்கவும்.</span>
+        </li>
+        <li>
+          <span class="en"><strong>Residency:</strong> you must be an Indian citizen ordinarily resident in the ward or constituency where you wish to register.</span>
+          <span class="ta"><strong>வசிப்பிடம்:</strong> நீங்கள் பதிவு செய்ய விரும்பும் வார்டு அல்லது தொகுதியில் வழக்கமாக வசிக்கும் இந்திய குடிமகனாக இருக்க வேண்டும்.</span>
+        </li>
+        <li>
+          <span class="en"><strong>Single registration:</strong> you cannot be registered in more than one constituency, or more than once in the same constituency.</span>
+          <span class="ta"><strong>ஒரே ஒரு பதிவு:</strong> ஒன்றுக்கு மேற்பட்ட தொகுதிகளில், அல்லது ஒரே தொகுதியில் ஒன்றுக்கு மேற்பட்ட முறை பதிவு செய்ய முடியாது.</span>
+        </li>
+        <li>
+          <span class="en"><strong>Voter ID:</strong> a valid EPIC (Voter ID) card, where you already have one, can be used as additional identification during verification.</span>
+          <span class="ta"><strong>வாக்காளர் அடையாள அட்டை:</strong> ஏற்கெனவே வைத்திருந்தால், செல்லுபடியாகும் EPIC (வாக்காளர் அடையாள) அட்டையை சரிபார்ப்பின்போது கூடுதல் அடையாளச் சான்றாகப் பயன்படுத்தலாம்.</span>
+        </li>
+        <li>
+          <span class="en"><strong>Disqualification:</strong> persons declared of unsound mind by a competent court, or disqualified for corrupt election practices, are not eligible to register.</span>
+          <span class="ta"><strong>தகுதி நீக்கம்:</strong> தகுதியுள்ள நீதிமன்றத்தால் மனநிலை சரியில்லாதவர் என அறிவிக்கப்பட்டவர்கள், அல்லது ஊழல் தேர்தல் நடைமுறைகளுக்காக தகுதி நீக்கம் செய்யப்பட்டவர்கள் பதிவு செய்ய தகுதியற்றவர்கள்.</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="cta-row">
+      <a th:href="@{/evoting}" class="back-link">
+        <span class="en">← Back to Main Menu</span>
+        <span class="ta">← முதன்மை பட்டியலுக்குத் திரும்பு</span>
+      </a>
+    </div>
+
+    <div class="lang-toggle-row">
+      <div class="lang-toggle" role="group" aria-label="Language">
+        <button type="button" id="btnEn" class="active" onclick="setLang('en')">English</button>
+        <button type="button" id="btnTa" onclick="setLang('ta')">தமிழ்</button>
+      </div>
+    </div>
+
+    <div class="foot">
+      🇮🇳 Election Commission of Tamil Nadu &nbsp;·&nbsp; Helpline: <strong>1950</strong>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function setLang(lang){
+    document.body.classList.toggle('lang-ta', lang === 'ta');
+    document.getElementById('btnEn').classList.toggle('active', lang === 'en');
+    document.getElementById('btnTa').classList.toggle('active', lang === 'ta');
+    localStorage.setItem('tn-vote-lang', lang);
+  }
+  (function(){
+    var saved = localStorage.getItem('tn-vote-lang');
+    if(saved === 'ta') setLang('ta');
+  })();
+</script>
+
+</body>
+</html>

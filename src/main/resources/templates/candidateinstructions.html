@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Candidate Eligibility &amp; Instructions — Tamil Nadu E-Voting System</title>
+    <script>
+        (function(){
+          var t=localStorage.getItem('tn-vote-theme');
+          if(t==='dark')document.documentElement.setAttribute('data-theme','dark');
+        })();
+    </script>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800;900&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Sans+Tamil:wght@400;500;600;700&display=swap');
+
+        :root {
+          --navy:#060E1F; --navy-3:#1A3066;
+          --fire:#FF671F; --fire-2:#C94A00;
+          --green:#046A38; --gold:#C8960C;
+          --ink:#060E1F; --muted:#718096; --faint:#a0aec0;
+          --surface:#f7f8fc; --card:#ffffff; --border:#e2e8f0;
+          --shadow:0 20px 60px rgba(6,14,31,0.12),0 6px 20px rgba(6,14,31,0.07);
+        }
+        [data-theme="dark"] {
+          --ink:#f0f4ff; --muted:#94a3b8; --faint:#64748b;
+          --surface:#0a1428; --card:#0f1d3a; --border:#1e3058;
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:'DM Sans',sans-serif;background:var(--surface);min-height:100vh;color:var(--ink);display:flex;flex-direction:column}
+        [lang="ta"]{font-family:'Noto Sans Tamil','DM Sans',sans-serif}
+
+        .bg-mesh{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 70% 50% at 10% 10%,rgba(255,103,31,0.07) 0%,transparent 60%),radial-gradient(ellipse 60% 50% at 90% 90%,rgba(4,106,56,0.06) 0%,transparent 60%)}
+
+        .page-body{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align-items:center;padding:3rem 1.5rem}
+        .wrap{width:100%;max-width:720px}
+
+        .top-row{display:flex;align-items:center;gap:.75rem;margin-bottom:1.5rem;flex-wrap:wrap}
+
+        .lang-toggle-row{display:flex;justify-content:center;margin-top:1.75rem;animation:fadeUp 600ms 140ms ease both}
+
+        .back-link{
+          display:inline-flex;align-items:center;gap:.4rem;
+          padding:.6rem 1.25rem;border-radius:8px;
+          background:#1A3066;color:#fff;border:1.5px solid #1A3066;
+          font-family:'Sora',sans-serif;font-size:.82rem;font-weight:700;
+          text-decoration:none;transition:all 150ms;
+        }
+        .back-link:hover{background:#122148;border-color:#122148;transform:translateY(-1px)}
+        .back-link:active{transform:translateY(0) scale(0.97)}
+
+        .lang-toggle{
+          display:inline-flex;border-radius:8px;overflow:hidden;
+          border:1.5px solid var(--border);
+        }
+        .lang-toggle button{
+          font-family:'Sora',sans-serif;font-size:.78rem;font-weight:700;
+          padding:.55rem 1rem;border:none;background:var(--card);color:var(--muted);
+          cursor:pointer;transition:background 150ms,color 150ms;
+        }
+        .lang-toggle button.active{background:var(--gold);color:#fff}
+
+        /* language visibility: default shows English, hides Tamil */
+        .ta{display:none}
+        body.lang-ta .en{display:none}
+        body.lang-ta .ta{display:inline}
+        body.lang-ta li .ta{display:block;margin-top:.2rem}
+
+        .hero{text-align:center;margin-bottom:2rem;animation:fadeUp 500ms ease both}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+        .hero-badge{display:inline-flex;align-items:center;gap:0.5rem;background:rgba(200,150,12,0.1);border:1px solid rgba(200,150,12,0.25);border-radius:999px;padding:0.35rem 0.9rem;font-family:'Sora',sans-serif;font-size:0.7rem;font-weight:700;color:var(--gold);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:1.1rem}
+        .hero h1{font-family:'Sora',sans-serif;font-size:1.85rem;font-weight:800;letter-spacing:-0.03em;margin-bottom:0.6rem}
+        .hero h1 span{color:var(--gold)}
+        .hero p{font-size:0.92rem;color:var(--muted);line-height:1.6}
+
+        .info-card{
+          background:var(--card);border:1px solid var(--border);border-radius:16px;
+          padding:1.75rem 2rem;box-shadow:var(--shadow);margin-bottom:1.5rem;
+          animation:fadeUp 550ms 80ms ease both;
+        }
+        .info-card h2{
+          font-family:'Sora',sans-serif;font-size:1.1rem;font-weight:800;
+          margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;
+          color:var(--gold);
+        }
+        .info-card ul{padding-left:1.2rem;display:flex;flex-direction:column;gap:.65rem}
+        .info-card li{font-size:.88rem;color:var(--muted);line-height:1.5}
+        .info-card li strong{color:var(--ink)}
+        .info-card li .ta{font-size:.86rem;color:var(--muted)}
+
+        .cta-row{display:flex;gap:.9rem;flex-wrap:wrap;justify-content:center;margin-top:1rem;animation:fadeUp 600ms 120ms ease both}
+        .cta-btn{
+          display:inline-flex;align-items:center;gap:.5rem;
+          padding:.75rem 1.5rem;border-radius:10px;
+          font-family:'Sora',sans-serif;font-size:.85rem;font-weight:700;
+          text-decoration:none;transition:transform 150ms,box-shadow 150ms;
+        }
+        .cta-btn:hover{transform:translateY(-2px)}
+        .cta-btn.candidate{background:var(--gold);color:#fff}
+
+        .foot{margin-top:2.5rem;text-align:center;font-size:0.78rem;color:var(--faint);line-height:1.8}
+    </style>
+</head>
+<body>
+<div class="bg-mesh" aria-hidden="true"></div>
+
+<header class="ec-header">
+    <div class="ec-left">
+        <div class="ec-emblem">⚖️</div>
+        <div class="ec-brand">
+            <span class="ec-brand-main">தேர்தல் ஆணையம் · Election Commission of Tamil Nadu</span>
+            <span class="ec-brand-sub">Tamil Nadu Legislative Assembly Election — 2026</span>
+        </div>
+    </div>
+    <div class="flag-pill"><span class="fp-s"></span><span class="fp-w"></span><span class="fp-g"></span></div>
+</header>
+
+<div class="page-body">
+
+
+
+
+        <div class="hero">
+            <div class="hero-badge">
+                <span class="en">🏛️ Read Before You Register</span>
+                <span class="ta">🏛️ பதிவு செய்வதற்கு முன் படிக்கவும்</span>
+            </div>
+            <h1>
+                <span class="en">Candidate Eligibility &amp; <span>Instructions</span></span>
+                <span class="ta">வேட்பாளர் தகுதி மற்றும் <span>வழிமுறைகள்</span></span>
+            </h1>
+            <p>
+                <span class="en">Please review the rules below before submitting your candidacy.</span>
+                <span class="ta">உங்கள் வேட்புமனுவைச் சமர்ப்பிக்கும் முன் கீழே உள்ள விதிகளை மதிப்பாய்வு செய்யவும்.</span>
+            </p>
+        </div>
+
+        <div class="info-card">
+            <h2>
+                <span class="en">🏛️ For Candidates</span>
+                <span class="ta">🏛️ வேட்பாளர்களுக்கு</span>
+            </h2>
+            <ul>
+                <li>
+                    <span class="en"><strong>Minimum age:</strong> 25 years or older on the date of nomination.</span>
+                    <span class="ta"><strong>குறைந்தபட்ச வயது:</strong> வேட்புமனு தாக்கல் செய்யும் தேதியில் 25 வயது அல்லது அதற்கு மேல்.</span>
+                </li>
+                <li>
+                    <span class="en"><strong>One nomination per party per ward:</strong> a party can field only one candidate in a given ward.</span>
+                    <span class="ta"><strong>ஒரு கட்சிக்கு ஒரு வார்டில் ஒரே வேட்புமனு:</strong> ஒரு கட்சி ஒரு குறிப்பிட்ட வார்டில் ஒரே ஒரு வேட்பாளரை மட்டுமே நிறுத்த முடியும்.</span>
+                </li>
+                <li>
+                    <span class="en"><strong>Required at registration:</strong> full name, date of birth, valid ID proof, contact number, email, and an asset declaration.</span>
+                    <span class="ta"><strong>பதிவுக்குத் தேவையானவை:</strong> முழுப்பெயர், பிறந்த தேதி, செல்லுபடியாகும் அடையாளச் சான்று, தொடர்பு எண், மின்னஞ்சல் மற்றும் சொத்து பிரகடனம்.</span>
+                </li>
+                <li>
+                    <span class="en"><strong>After submitting:</strong> your application is marked Pending and goes to the Election Commission for review. You'll be notified once it's approved or rejected.</span>
+                    <span class="ta"><strong>சமர்ப்பித்த பிறகு:</strong> உங்கள் விண்ணப்பம் 'நிலுவையில்' எனக் குறிக்கப்பட்டு தேர்தல் ஆணையத்திடம் மதிப்பாய்வுக்காக அனுப்பப்படும். அது ஏற்கப்பட்டதா அல்லது நிராகரிக்கப்பட்டதா என உங்களுக்கு அறிவிக்கப்படும்.</span>
+                </li>
+                <li>
+                    <span class="en"><strong>Nominations close</strong> once the Election Commission locks the candidate setup — no further registrations, edits, or approvals are possible after that.</span>
+                    <span class="ta"><strong>வேட்புமனு தாக்கல் முடிவு:</strong> தேர்தல் ஆணையம் வேட்பாளர் அமைப்பை பூட்டியவுடன் வேட்புமனு தாக்கல் முடிவடையும் — அதற்குப் பிறகு மேலும் பதிவுகள், திருத்தங்கள் அல்லது ஒப்புதல்கள் சாத்தியமில்லை.</span>
+                </li>
+                <li>
+                    <span class="en"><strong>Citizenship &amp; enrolment:</strong> you must be an Indian citizen and registered as an elector in Tamil Nadu.</span>
+                    <span class="ta"><strong>குடியுரிமை &amp; பதிவு:</strong> இந்திய குடிமகனாகவும், தமிழ்நாட்டில் வாக்காளராகவும் பதிவு செய்யப்பட்டவராகவும் இருக்க வேண்டும்.</span>
+                </li>
+                <li>
+                    <span class="en"><strong>Not disqualified:</strong> you must not be disqualified under the Representation of the People Act, 1951 — including insolvency, unsoundness of mind, or conviction for certain offences.</span>
+                    <span class="ta"><strong>தகுதி நீக்கம் இல்லாதவர்:</strong> மக்கள் பிரதிநிதித்துவச் சட்டம், 1951-ன் கீழ் தகுதி நீக்கம் செய்யப்பட்டவராக இருக்கக் கூடாது — இதில் திவால் நிலை, மனநிலை சரியின்மை அல்லது சில குற்றங்களுக்கான தண்டனை ஆகியவை அடங்கும்.</span>
+                </li>
+                <li>
+                    <span class="en"><strong>Security deposit:</strong> a deposit is required when filing your nomination, and is refunded only if you secure the minimum required vote share.</span>
+                    <span class="ta"><strong>பாதுகாப்பு வைப்புத்தொகை:</strong> வேட்புமனு தாக்கல் செய்யும்போது பாதுகாப்பு வைப்புத்தொகை தேவை; குறைந்தபட்ச வாக்கு விகிதத்தைப் பெற்றால் மட்டுமே அது திரும்பச் செலுத்தப்படும்.</span>
+                </li>
+                <li>
+                    <span class="en"><strong>Affidavit:</strong> you must file an affidavit declaring any pending criminal cases, your educational qualifications, and your assets/liabilities.</span>
+                    <span class="ta"><strong>உறுதிமொழிப் பத்திரம்:</strong> நிலுவையிலுள்ள குற்றவியல் வழக்குகள் (இருந்தால்), கல்வித் தகுதிகள் மற்றும் சொத்து/பொறுப்புகள் குறித்த உறுதிமொழிப் பத்திரத்தைத் தாக்கல் செய்ய வேண்டும்.</span>
+                </li>
+            </ul>
+        </div>
+
+        <div class="cta-row">
+            <a th:href="@{/home}" class="cta-btn candidate">
+                <span class="en">🏠 Home</span>
+                <span class="ta">🏠 முகப்பு</span>
+            </a>
+        </div>
+
+        <div class="lang-toggle-row">
+            <div class="lang-toggle" role="group" aria-label="Language">
+                <button type="button" id="btnEn" class="active" onclick="setLang('en')">English</button>
+                <button type="button" id="btnTa" onclick="setLang('ta')">தமிழ்</button>
+            </div>
+        </div>
+
+        <div class="foot">
+            🇮🇳 Election Commission of Tamil Nadu &nbsp;·&nbsp; Helpline: <strong>1950</strong>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function setLang(lang){
+      document.body.classList.toggle('lang-ta', lang === 'ta');
+      document.getElementById('btnEn').classList.toggle('active', lang === 'en');
+      document.getElementById('btnTa').classList.toggle('active', lang === 'ta');
+      localStorage.setItem('tn-vote-lang', lang);
+    }
+    (function(){
+      var saved = localStorage.getItem('tn-vote-lang');
+      if(saved === 'ta') setLang('ta');
+    })();
+</script>
+
+</body>
+</html>

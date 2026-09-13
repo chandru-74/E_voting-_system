@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Admin Dashboard — Tamil Nadu E-Voting</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500&display=swap');
+
+        .danger-card {
+          background:#fff5f5; border:1px solid #fca5a5;
+          border-radius:16px; padding:1.75rem 2rem; box-shadow:var(--shadow-sm);
+          margin-bottom:2rem;
+        }
+        .danger-card h2 { font-family:'Sora',sans-serif; font-size:1rem; font-weight:700; color:#991b1b; margin-bottom:.5rem; }
+        .danger-card p { font-size:.82rem; color:#7f1d1d; margin-bottom:1.25rem; line-height:1.5; }
+        .btn-danger {
+          display:inline-flex; align-items:center; gap:.4rem;
+          padding:.7rem 1.6rem; border-radius:8px;
+          background:#dc2626; color:#fff; border:none;
+          font-family:'Sora',sans-serif; font-size:.85rem; font-weight:700;
+          cursor:pointer; transition:background 150ms;
+        }
+        .btn-danger:hover:not(:disabled) { background:#b91c1c; }
+        .btn-danger:disabled { background:#fca5a5; cursor:not-allowed; opacity:.7; }
+
+        body { font-family:'DM Sans',sans-serif; background:var(--bg-body,#f9f7f0); }
+        .dash-wrap { max-width:960px; margin:0 auto; padding:2.5rem 1rem 4rem; }
+        .dash-greeting { margin-bottom:2rem; }
+        .dash-greeting h1 { font-family:'Sora',sans-serif; font-size:1.6rem; font-weight:800; color:var(--ink); margin-bottom:.3rem; }
+        .dash-greeting p  { font-size:.875rem; color:var(--text-3); }
+
+        .stat-row { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:2rem; }
+        .stat-tile {
+          background:var(--bg-card,#fff); border:1px solid var(--border);
+          border-radius:16px; padding:1.35rem; text-align:center;
+          box-shadow:var(--shadow-sm); transition:transform 150ms,box-shadow 200ms;
+        }
+        .stat-tile:hover { transform:translateY(-2px); box-shadow:var(--shadow-md); }
+        .stat-ico  { font-size:1.8rem; margin-bottom:.5rem; }
+        .stat-num  { font-family:'Sora',sans-serif; font-size:2rem; font-weight:900; color:var(--ink); line-height:1; }
+        .stat-lbl  { font-family:'Sora',sans-serif; font-size:.67rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--text-4); margin-top:.35rem; }
+
+        .action-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-bottom:2rem; }
+        .action-card {
+          background:var(--bg-card,#fff); border:1px solid var(--border);
+          border-radius:16px; padding:1.5rem; text-align:center;
+          text-decoration:none; color:var(--ink);
+          box-shadow:var(--shadow-sm); transition:transform 150ms,box-shadow 200ms,background 150ms;
+        }
+        .action-card:hover { transform:translateY(-3px); box-shadow:var(--shadow-md); background:var(--navy-50); }
+        .ac-ico  { font-size:2rem; margin-bottom:.75rem; }
+        .ac-name { font-family:'Sora',sans-serif; font-size:.9rem; font-weight:700; color:var(--ink); margin-bottom:.3rem; }
+        .ac-desc { font-size:.78rem; color:var(--text-3); line-height:1.5; }
+
+        .logout-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; }
+        .back-to-login {
+          display:inline-flex; align-items:center; gap:.4rem;
+          padding:.6rem 1.25rem; border-radius:8px;
+          background:#1A3066; color:#fff; border:1.5px solid #1A3066;
+          font-family:'Sora',sans-serif; font-size:.82rem; font-weight:700;
+          cursor:pointer; text-decoration:none; transition:all 150ms;
+        }
+        .back-to-login:hover { background:#122148; border-color:#122148; transform:translateY(-1px); }
+        .back-to-login:active { transform:translateY(0) scale(0.97); }
+
+        .alert-success {
+          background:#d1fae5; color:#065f46; border:1px solid #6ee7b7;
+          border-radius:8px; padding:.75rem 1rem; margin-bottom:1.5rem;
+          font-family:'Sora',sans-serif; font-size:.85rem; font-weight:600;
+        }
+        .alert-error {
+          background:#fee2e2; color:#991b1b; border:1px solid #fca5a5;
+          border-radius:8px; padding:.75rem 1rem; margin-bottom:1.5rem;
+          font-family:'Sora',sans-serif; font-size:.85rem; font-weight:600;
+        }
+
+        .publish-card {
+          background:var(--bg-card,#fff); border:1px solid var(--border);
+          border-radius:16px; padding:1.75rem 2rem; box-shadow:var(--shadow-sm);
+          margin-bottom:2rem;
+        }
+        .publish-card h2 {
+          font-family:'Sora',sans-serif; font-size:1rem; font-weight:700;
+          color:var(--ink); margin-bottom:.5rem;
+        }
+        .publish-card p {
+          font-size:.82rem; color:var(--text-3); margin-bottom:1.25rem; line-height:1.5;
+        }
+        .btn-publish {
+          display:inline-flex; align-items:center; gap:.4rem;
+          padding:.7rem 1.6rem; border-radius:8px;
+          background:#1e3a5f; color:#fff; border:none;
+          font-family:'Sora',sans-serif; font-size:.85rem; font-weight:700;
+          cursor:pointer; transition:background 150ms;
+        }
+        .btn-publish:hover { background:#16304d; }
+        .publish-done {
+          display:inline-flex; align-items:center; gap:.5rem;
+          background:#d1fae5; color:#065f46; border:1px solid #6ee7b7;
+          border-radius:8px; padding:.65rem 1rem;
+          font-family:'Sora',sans-serif; font-size:.85rem; font-weight:700;
+        }
+
+        .ec-brand-main { font-weight: 800 !important; }
+        .ec-brand-sub  { font-weight: 700 !important; }
+        .ec-left { display:flex !important; align-items:center !important; gap:.5rem !important; }
+        .ec-brand { display:flex !important; align-items:center !important; gap:.5rem !important; }
+        .ec-brand-main, .ec-brand-sub { display:inline !important; margin:0 !important; }
+
+        @media (max-width:640px) {
+          .stat-row    { grid-template-columns:1fr 1fr; }
+          .action-grid { grid-template-columns:1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+<header class="ec-header">
+    <div class="ec-left">
+        <div class="ec-emblem">⚖️</div>
+        <div class="ec-brand">
+            <span class="ec-brand-main">தேர்தல் ஆணையம்</span>
+            <span class="ec-brand-sub">நிர்வாக டாஷ்போர்டு</span>
+        </div>
+    </div>
+    <div class="ec-right">
+        <div class="flag-pill"><span class="fp-s"></span><span class="fp-w"></span><span class="fp-g"></span></div>
+    </div>
+</header>
+
+<div class="dash-wrap">
+
+    <div class="logout-row">
+        <form th:action="@{/admin/logout}" method="post" style="display:inline;">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <button class="back-to-login" type="submit">Logout</button>
+        </form>
+    </div>
+    <div class="dash-greeting">
+        <h1>Welcome, <span th:text="${adminName ?: 'Admin'}">Admin</span> 👋</h1>
+        <p>Election Administration Panel — Tamil Nadu E-Voting System</p>
+    </div>
+
+    <div class="alert-success" th:if="${success}" th:text="${success}"></div>
+    <div class="alert-error" th:if="${error}" th:text="${error}"></div>
+
+    <div class="stat-row">
+        <div class="stat-tile">
+            <div class="stat-ico">🗳️</div>
+            <div class="stat-num" th:text="${totalVotes}">0</div>
+            <div class="stat-lbl">Total Votes</div>
+        </div>
+        <div class="stat-tile">
+            <div class="stat-ico">🏛️</div>
+            <div class="stat-num" th:text="${totalCandidates}">0</div>
+            <div class="stat-lbl">Approved Parties</div>
+        </div>
+        <div class="stat-tile">
+            <div class="stat-ico">👥</div>
+            <div class="stat-num" th:text="${totalVoters}">0</div>
+            <div class="stat-lbl">Registered Voters</div>
+        </div>
+        <div class="stat-tile">
+            <div class="stat-ico">⏳</div>
+            <div class="stat-num" th:text="${pendingCandidates}">0</div>
+            <div class="stat-lbl">Pending Cards</div>
+        </div>
+    </div>
+
+    <!-- Quick actions -->
+    <div class="action-grid">
+
+        <a href="/admin/add-candidate" class="action-card">
+            <div class="ac-ico">➕</div>
+            <div class="ac-name">Add Ballot Card</div>
+            <div class="ac-desc">Add a party to the ward ballot</div>
+        </a>
+        <a href="/admin/candidates/pending" class="action-card">
+            <div class="ac-ico">📋</div>
+            <div class="ac-name">Pending Cards</div>
+            <div class="ac-desc">Approve or reject party submissions</div>
+        </a>
+        <a href="/live-results" class="action-card">
+            <div class="ac-ico">📊</div>
+            <div class="ac-name">Live Results</div>
+            <div class="ac-desc">Real-time vote counts</div>
+        </a>
+        <a href="/final-results" class="action-card">
+            <div class="ac-ico">🏁</div>
+            <div class="ac-name">Final Results</div>
+            <div class="ac-desc">Published official results</div>
+        </a>
+        <a href="/admin/voters" class="action-card">
+            <div class="ac-ico">👥</div>
+            <div class="ac-name">Voter Management</div>
+            <div class="ac-desc">
+                Approve or reject voter registrations
+                <span th:if="${pendingVoters > 0}"
+                      style="display:inline-block;background:#fef3c7;color:#92400e;
+                             border-radius:999px;padding:1px 8px;font-size:.7rem;
+                             font-weight:700;margin-left:4px;"
+                      th:text="${pendingVoters} + ' pending'"></span>
+            </div>
+        </a>
+
+        <a th:href="@{/admin/audit}" class="action-card">
+            <div class="ac-ico">⛓️</div>
+            <div class="ac-name">Blockchain Audit</div>
+            <div class="ac-desc">Verify chain integrity and detect tampering</div>
+        </a>
+    </div>
+
+    <!-- Voting Window Control -->
+    <div class="window-card" style="background:var(--bg-card,#fff); border:1px solid var(--border); border-radius:16px; padding:1.75rem 2rem; box-shadow:var(--shadow-sm); margin-bottom:2rem;">
+        <h2 style="font-family:'Sora',sans-serif; font-size:1rem; font-weight:700; color:var(--ink); margin-bottom:1.25rem;">🕐 Voting Window Control</h2>
+
+        <div th:if="${votingWindow != null}">
+            <div style="background:#d1fae5;color:#065f46;border:1px solid #6ee7b7;border-radius:8px;padding:.65rem 1rem;margin-bottom:1rem;font-size:.82rem;font-weight:600;"
+                 th:if="${votingOpen}"
+                 th:text="'✅ Voting is OPEN — closes at ' + ${#temporals.format(votingWindow.endTime, 'dd-MM-yyyy hh:mm a')}">
+            </div>
+            <div style="background:#fef3c7;color:#92400e;border:1px solid #fcd34d;border-radius:8px;padding:.65rem 1rem;margin-bottom:1rem;font-size:.82rem;font-weight:600;"
+                 th:if="${!votingOpen and #temporals.createNow().isBefore(votingWindow.startTime)}"
+                 th:text="'⏳ Scheduled — opens ' + ${#temporals.format(votingWindow.startTime, 'dd-MM-yyyy hh:mm a')} + ' · closes ' + ${#temporals.format(votingWindow.endTime, 'dd-MM-yyyy hh:mm a')}">
+            </div>
+            <div style="background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;border-radius:8px;padding:.65rem 1rem;margin-bottom:1rem;font-size:.82rem;font-weight:600;"
+                 th:if="${!votingOpen and #temporals.createNow().isAfter(votingWindow.endTime)}"
+                 th:text="'🔒 Voting CLOSED — ended at ' + ${#temporals.format(votingWindow.endTime, 'dd-MM-yyyy hh:mm a')}">
+            </div>
+        </div>
+        <div style="background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;border-radius:8px;padding:.65rem 1rem;margin-bottom:1rem;font-size:.82rem;font-weight:600;" th:if="${votingWindow == null}">
+            🔒 No voting window configured yet.
+        </div>
+
+        <form th:action="@{/admin/voting-window}" method="post" style="margin-top:1.25rem;">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem;">
+                <div>
+                    <label style="font-family:'Sora',sans-serif;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);display:block;margin-bottom:.4rem;">Start Time</label>
+                    <input type="datetime-local" name="startTime" required
+                           style="width:100%;padding:.6rem .85rem;border-radius:8px;border:1px solid var(--border,#e5e7eb);font-size:.875rem;"
+                           th:value="${votingWindow != null} ? ${#temporals.format(votingWindow.startTime, 'yyyy-MM-dd''T''HH:mm')} : ''"/>
+                </div>
+                <div>
+                    <label style="font-family:'Sora',sans-serif;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);display:block;margin-bottom:.4rem;">End Time</label>
+                    <input type="datetime-local" name="endTime" required
+                           style="width:100%;padding:.6rem .85rem;border-radius:8px;border:1px solid var(--border,#e5e7eb);font-size:.875rem;"
+                           th:value="${votingWindow != null} ? ${#temporals.format(votingWindow.endTime, 'yyyy-MM-dd''T''HH:mm')} : ''"/>
+                </div>
+            </div>
+            <button type="submit" style="display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.5rem;border-radius:8px;background:#1e3a5f;color:#fff;border:none;font-family:'Sora',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;">🕐 Set Voting Window</button>
+        </form>
+    </div>
+    <!-- Candidate Setup Lock -->
+    <div class="window-card" style="background:var(--bg-card,#fff); border:1px solid var(--border); border-radius:16px; padding:1.75rem 2rem; box-shadow:var(--shadow-sm); margin-bottom:2rem;">
+        <h2 style="font-family:'Sora',sans-serif; font-size:1rem; font-weight:700; color:var(--ink); margin-bottom:1rem;">🔒 Candidate Setup Lock</h2>
+        <div th:unless="${candidatesLocked}" style="background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;border-radius:8px;padding:.65rem 1rem;margin-bottom:1rem;font-size:.82rem;font-weight:600;">
+            ⚠️ Lock the candidate setup above before you can open the voting booth.
+        </div>
+        <div th:if="${candidatesLocked}">
+            <div style="background:#d1fae5;color:#065f46;border:1px solid #6ee7b7;border-radius:8px;padding:.65rem 1rem;margin-bottom:1rem;font-size:.82rem;font-weight:600;"
+                 th:text="'✅ Candidate setup is LOCKED — final ballot published since ' + ${#temporals.format(candidatesLockedAt, 'dd-MM-yyyy hh:mm a')}">
+            </div>
+            <form th:action="@{/admin/unlock-candidates}" method="post"
+                  onsubmit="return confirm('Unlock candidate setup? This re-opens nominations and edits, and the public candidate list will show as provisional again.');">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <button type="submit" style="padding:.6rem 1.25rem;border-radius:8px;background:#fef3c7;color:#92400e;border:1px solid #fcd34d;font-family:'Sora',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;">
+                    🔓 Unlock for Edits
+                </button>
+            </form>
+        </div>
+
+        <div th:unless="${candidatesLocked}">
+            <p style="font-size:.82rem;color:var(--text-3);margin-bottom:1rem;line-height:1.5;">
+                Once every ward has its candidates registered and approved, lock the setup here.
+                This finalizes the ballot, publishes the public candidate list, and unblocks opening
+                the voting window. Nominations and admin edits are disabled while locked.
+            </p>
+            <form th:action="@{/admin/lock-candidates}" method="post"
+                  onsubmit="return confirm('Lock the candidate setup? Nominations, approvals, and edits will be disabled, and the final candidate list becomes public.');">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <button type="submit" style="padding:.65rem 1.5rem;border-radius:8px;background:#1e3a5f;color:#fff;border:none;font-family:'Sora',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;">
+                    🔒 Lock Candidate Setup &amp; Finalize Ballot
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Publish Final Results -->
+    <div class="publish-card">
+        <h2>🏁 Publish Final Results</h2>
+
+        <div th:if="${resultsPublished}">
+            <p>The official results have already been published. They are now visible to the public on the Final Results page.</p>
+            <div class="publish-done">✅ Results Published</div>
+        </div>
+
+        <div th:unless="${resultsPublished}">
+            <p>This locks in the official results — ward winners and vote totals — and makes them visible on the public Final Results page. This action cannot be easily undone, so make sure voting has closed and all vote counts look correct before publishing.</p>
+            <form th:action="@{/admin/publish-results}" method="post"
+                  onsubmit="return confirm('Publish the final results? This will lock in the official winners and totals and make them public. This cannot be easily undone.');">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <button type="submit" class="btn-publish">🏁 Publish Final Results</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Reset Election (destructive — votes only, keeps parties & voters) -->
+    <div class="danger-card">
+        <h2>♻️ Reset Election</h2>
+        <p>
+            This wipes every vote count, clears every voter's "has voted" flag so they can vote again,
+            deletes all vote receipts, and un-publishes any published results. Candidate and voter
+            records themselves are kept untouched. <strong>This cannot be undone.</strong> Only do this
+            to start a brand-new election cycle with the same parties and voters.
+        </p>
+        <div id="resetMsg" style="display:none;margin-bottom:1rem;border-radius:8px;padding:.75rem 1rem;font-size:.85rem;font-weight:600;"></div>
+        <label style="display:block;font-family:'Sora',sans-serif;font-size:.78rem;font-weight:700;color:#7f1d1d;margin-bottom:.5rem;">
+            Type <code>RESET</code> below to enable the button
+        </label>
+        <div style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:center;">
+            <input id="resetConfirmInput" type="text" placeholder="Type RESET" autocomplete="off"
+                   style="padding:.6rem .85rem;border-radius:8px;border:1.5px solid #fca5a5;font-size:.875rem;max-width:200px;"
+                   oninput="checkResetInput(this.value)"/>
+            <button id="resetBtn" type="button" class="btn-danger" disabled onclick="doElectionReset()">
+                ♻️ Reset Election Now
+            </button>
+        </div>
+        <div id="resetHint" style="font-size:.75rem;color:#7f1d1d;margin-top:.4rem;"></div>
+    </div>
+
+    <!-- Full Reset — deletes parties AND voters, not just votes -->
+    <div class="danger-card" style="border-color:#7f1d1d; background:#450a0a05;">
+        <h2>🗑️ Full Reset (Delete Parties &amp; Voters)</h2>
+        <p>
+            Use this when parties are different for a new election cycle. This deletes
+            <strong>every party/candidate row</strong> and <strong>every registered voter</strong>
+            permanently — not just votes. Voters will need to register again; you'll need to add
+            new parties from scratch. <strong>This is more destructive than "Reset Election" above
+            and cannot be undone.</strong>
+        </p>
+        <div id="fullResetMsg" style="display:none;margin-bottom:1rem;border-radius:8px;padding:.75rem 1rem;font-size:.85rem;font-weight:600;"></div>
+        <label style="display:block;font-family:'Sora',sans-serif;font-size:.78rem;font-weight:700;color:#7f1d1d;margin-bottom:.5rem;">
+            Type <code>DELETE ALL</code> below to enable the button
+        </label>
+        <div style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:center;">
+            <input id="fullResetConfirmInput" type="text" placeholder="Type DELETE ALL" autocomplete="off"
+                   style="padding:.6rem .85rem;border-radius:8px;border:1.5px solid #fca5a5;font-size:.875rem;max-width:220px;"
+                   oninput="checkFullResetInput(this.value)"/>
+            <button id="fullResetBtn" type="button" class="btn-danger" style="background:#7f1d1d;" disabled onclick="doFullReset()">
+                🗑️ Delete Everything &amp; Start Fresh
+            </button>
+        </div>
+        <div id="fullResetHint" style="font-size:.75rem;color:#7f1d1d;margin-top:.4rem;"></div>
+    </div>
+
+</div>
+
+<script>
+    // ── Reset Election ──────────────────────────────────────────
+    function checkResetInput(value) {
+        const trimmed = value.trim();
+        const btn  = document.getElementById('resetBtn');
+        const hint = document.getElementById('resetHint');
+        const matches = trimmed === 'RESET';
+
+        btn.disabled = !matches;
+        hint.textContent = matches
+            ? '✓ Button enabled'
+            : (trimmed.length > 0 ? `You typed: "${trimmed}" — needs to be exactly: RESET` : '');
+    }
+
+    async function doElectionReset() {
+        if (!confirm('FINAL CONFIRMATION: this permanently wipes all votes and cannot be undone. Proceed?')) {
+            return;
+        }
+        const btn = document.getElementById('resetBtn');
+        const msgBox = document.getElementById('resetMsg');
+        btn.disabled = true;
+        btn.textContent = 'Resetting…';
+
+        try {
+            const res = await fetch('/api/results/reset', { method: 'POST' });
+            const data = await res.json();
+            msgBox.style.display = 'block';
+
+            if (res.ok) {
+                msgBox.style.background = '#d1fae5';
+                msgBox.style.color = '#065f46';
+                msgBox.style.border = '1px solid #6ee7b7';
+                msgBox.textContent = data.message || 'Election reset successfully.';
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                msgBox.style.background = '#fee2e2';
+                msgBox.style.color = '#991b1b';
+                msgBox.style.border = '1px solid #fca5a5';
+                msgBox.textContent = data.error || 'Reset failed.';
+                btn.disabled = false;
+                btn.textContent = '♻️ Reset Election Now';
+            }
+        } catch (err) {
+            alert('Network error — reset may not have completed. Refresh and check the stats before retrying.');
+            btn.disabled = false;
+            btn.textContent = '♻️ Reset Election Now';
+        }
+    }
+
+    // ── Full Reset ──────────────────────────────────────────────
+    function checkFullResetInput(value) {
+        const trimmed = value.trim();
+        const btn  = document.getElementById('fullResetBtn');
+        const hint = document.getElementById('fullResetHint');
+        const matches = trimmed === 'DELETE ALL';
+
+        btn.disabled = !matches;
+        hint.textContent = matches
+            ? '✓ Button enabled'
+            : (trimmed.length > 0 ? `You typed: "${trimmed}" — needs to be exactly: DELETE ALL` : '');
+    }
+
+    async function doFullReset() {
+        if (!confirm('ABSOLUTE FINAL CONFIRMATION: this permanently deletes every party and every registered voter. There is no undo. Proceed?')) {
+            return;
+        }
+        const btn = document.getElementById('fullResetBtn');
+        const msgBox = document.getElementById('fullResetMsg');
+        btn.disabled = true;
+        btn.textContent = 'Deleting…';
+
+        try {
+            const res = await fetch('/api/results/full-reset', { method: 'POST' });
+            const data = await res.json();
+            msgBox.style.display = 'block';
+
+            if (res.ok) {
+                msgBox.style.background = '#d1fae5';
+                msgBox.style.color = '#065f46';
+                msgBox.style.border = '1px solid #6ee7b7';
+                msgBox.textContent = data.message || 'Full reset complete.';
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                msgBox.style.background = '#fee2e2';
+                msgBox.style.color = '#991b1b';
+                msgBox.style.border = '1px solid #fca5a5';
+                msgBox.textContent = data.error || 'Full reset failed.';
+                btn.disabled = false;
+                btn.textContent = '🗑️ Delete Everything & Start Fresh';
+            }
+        } catch (err) {
+            alert('Network error — full reset may not have completed. Refresh and check the stats before retrying.');
+            btn.disabled = false;
+            btn.textContent = '🗑️ Delete Everything & Start Fresh';
+        }
+    }
+</script>
+
+</body>
+</html>

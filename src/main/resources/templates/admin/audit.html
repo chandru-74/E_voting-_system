@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Blockchain Audit — Tamil Nadu E-Voting</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap');
+
+    body { font-family: 'DM Sans', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #e9ecf1 100%); min-height: 100vh; }
+
+    .container {
+      max-width: 800px; margin: 0 auto; padding: 2rem 1rem;
+    }
+
+    .audit-card {
+      background: #fff; border-radius: 20px; padding: 2.5rem;
+      box-shadow: 0 8px 24px rgba(12,26,62,0.12); border: 1px solid rgba(200,150,12,0.1);
+      animation: cardIn 480ms cubic-bezier(0.22,1,0.36,1) both;
+    }
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(24px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .audit-header {
+      text-align: center; margin-bottom: 2.5rem;
+    }
+
+    .audit-icon {
+      font-size: 4rem; margin-bottom: 1rem; display: inline-block;
+      animation: pulse 2s cubic-bezier(0.4,0,0.6,1) infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .audit-title {
+      font-size: 1.8rem; font-weight: 800; color: #060E1F;
+      font-family: 'Sora', sans-serif; margin-bottom: 0.5rem;
+    }
+
+    .audit-subtitle {
+      font-size: 0.95rem; color: var(--text-3); line-height: 1.6;
+    }
+
+    /* Status Section */
+    .status-section {
+      background: linear-gradient(135deg, rgba(4,138,78,0.05), rgba(4,138,78,0.02));
+      border-radius: 16px; padding: 2rem; margin-bottom: 2rem;
+      border: 1.5px solid rgba(4,138,78,0.2);
+      display: none;
+    }
+
+    .status-section.valid {
+      display: block;
+      animation: slideUp 600ms cubic-bezier(0.22,1,0.36,1) both;
+    }
+
+    .status-section.invalid {
+      background: linear-gradient(135deg, rgba(220,38,38,0.08), rgba(220,38,38,0.03));
+      border-color: rgba(220,38,38,0.3);
+      display: block;
+      animation: slideUp 600ms cubic-bezier(0.22,1,0.36,1) both;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.25rem;
+      border-radius: 12px; font-weight: 700; font-size: 1rem; margin-bottom: 1rem;
+      font-family: 'Sora', sans-serif;
+    }
+
+    .status-badge.valid {
+      background: rgba(4,138,78,0.15); color: #065F46; border: 1px solid rgba(4,138,78,0.3);
+    }
+
+    .status-badge.invalid {
+      background: rgba(220,38,38,0.15); color: #991B1B; border: 1px solid rgba(220,38,38,0.3);
+    }
+
+    .status-message {
+      font-size: 1rem; line-height: 1.8; color: #374151; margin-bottom: 1.5rem;
+    }
+
+    .status-message.invalid {
+      color: #7F1D1D; font-weight: 600;
+    }
+
+    .status-details {
+      background: rgba(255,255,255,0.5); border-radius: 10px; padding: 1.25rem;
+      font-size: 0.875rem; line-height: 1.7; color: #4B5563;
+    }
+
+    .status-details strong {
+      color: #1F2937; font-weight: 700;
+    }
+
+    .status-details.invalid {
+      background: rgba(220,38,38,0.08); color: #7F1D1D;
+    }
+
+    /* Audit Results */
+    .audit-results {
+      background: #f9fafb; border-radius: 16px; padding: 1.75rem; margin-bottom: 2rem;
+      border: 1px solid #e5e7eb;
+    }
+
+    .results-title {
+      font-size: 1rem; font-weight: 700; color: #060E1F;
+      font-family: 'Sora', sans-serif; margin-bottom: 1.25rem;
+    }
+
+    .result-item {
+      display: flex; gap: 1rem; padding: 1rem; background: #fff;
+      border-radius: 10px; margin-bottom: 0.75rem; border: 1px solid #e5e7eb;
+    }
+
+    .result-icon {
+      font-size: 1.5rem; flex-shrink: 0; width: 2rem; text-align: center;
+    }
+
+    .result-content {
+      flex: 1;
+    }
+
+    .result-label {
+      font-size: 0.875rem; font-weight: 600; color: #374151; margin-bottom: 0.25rem;
+    }
+
+    .result-value {
+      font-size: 0.8rem; color: #6B7280; font-family: 'DM Mono', monospace;
+      word-break: break-all;
+    }
+
+    /* Action Buttons */
+    .audit-actions {
+      display: flex; gap: 1rem; margin-top: 2rem;
+    }
+
+    .btn {
+      padding: 0.9rem 1.75rem; border-radius: 10px; font-family: 'Sora', sans-serif;
+      font-size: 0.9rem; font-weight: 700; letter-spacing: 0.03em; cursor: pointer;
+      transition: all 150ms; border: none; display: flex; align-items: center;
+      justify-content: center; gap: 0.5rem; flex: 1; position: relative;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #1A3066, #0D1F3C); color: #fff;
+      box-shadow: 0 6px 20px rgba(26,48,102,0.4);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px); box-shadow: 0 12px 32px rgba(26,48,102,0.5);
+    }
+
+    .btn-secondary {
+      background: #e5e7eb; color: #374151;
+    }
+
+    .btn-secondary:hover { background: #d1d5db; }
+
+    .back-link {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      color: #1A3066; font-weight: 600; text-decoration: none;
+      font-size: 0.9rem; margin-bottom: 1.5rem; transition: color 150ms;
+    }
+
+    .back-link:hover { color: #0D1F3C; }
+
+    .back-link::before { content: '← '; }
+
+    .info-box {
+      background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3);
+      color: #1E40AF; padding: 1rem; border-radius: 10px; font-size: 0.875rem;
+      line-height: 1.6; margin-bottom: 2rem;
+    }
+
+    @media (max-width: 640px) {
+      .container { padding: 1rem; }
+      .audit-card { padding: 1.5rem; }
+      .audit-title { font-size: 1.4rem; }
+      .audit-icon { font-size: 3rem; }
+      .audit-actions { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="ec-header">
+  <div class="ec-left">
+    <div class="ec-emblem">⚖️</div>
+    <div class="ec-brand">
+      <span class="ec-brand-main">தேர்தல் ஆணையம் · Election Commission</span>
+      <span class="ec-brand-sub">Blockchain Audit</span>
+    </div>
+  </div>
+  <div class="ec-right">
+    <div class="flag-pill"><span class="fp-s"></span><span class="fp-w"></span><span class="fp-g"></span></div>
+    <span class="ec-chip">🔒 Secure</span>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="audit-card">
+
+    <div class="audit-header">
+      <div class="audit-icon" th:text="${chainValid} ? '🔐' : '⚠️'">🔐</div>
+      <h1 class="audit-title">Blockchain Audit Report</h1>
+      <p class="audit-subtitle">Verifying the integrity of the election blockchain and detecting any tampering</p>
+    </div>
+
+    <div class="info-box">
+      🔍 This audit verifies that all vote records are intact and have not been modified. The blockchain uses cryptographic hashing to ensure data integrity.
+    </div>
+
+    <!-- VALID Chain Status -->
+    <div class="status-section valid" th:if="${chainValid}">
+      <div class="status-badge valid">
+        <span>✓</span>
+        <span>Chain Valid</span>
+      </div>
+      <div class="status-message">
+        All vote records are intact and cryptographically secured. <strong>No unauthorized modifications detected.</strong>
+      </div>
+      <div class="status-details">
+        <strong>Audit Result:</strong> PASSED ✓<br>
+        The blockchain has been successfully verified. Every block's hash has been validated against its predecessor, and all transactions are accounted for. The election system maintains perfect data integrity.
+      </div>
+    </div>
+
+    <!-- INVALID Chain Status -->
+    <div class="status-section invalid" th:if="not ${chainValid}">
+      <div class="status-badge invalid">
+        <span>✗</span>
+        <span>Chain Invalid</span>
+      </div>
+      <div class="status-message invalid">
+        ⚠️ <strong>Chain integrity FAILED.</strong> One or more records may have been tampered with. Immediate investigation required.
+      </div>
+      <div class="status-details invalid">
+        <strong>Audit Result:</strong> FAILED ✗<br>
+        The blockchain validation has detected inconsistencies. One or more blocks have hash mismatches, indicating potential tampering. This is a critical security issue and must be investigated immediately. Contact the Election Commission Technical Team.
+      </div>
+    </div>
+
+    <!-- Audit Details -->
+    <div class="audit-results">
+      <div class="results-title">📊 Audit Parameters</div>
+
+      <div class="result-item">
+        <div class="result-icon">📦</div>
+        <div class="result-content">
+          <div class="result-label">Blocks Verified</div>
+          <div class="result-value" th:text="${blockCount} + ' block(s) checked'">0 block(s) checked</div>
+        </div>
+      </div>
+
+      <div class="result-item" th:if="${latestBlockHash != null}">
+        <div class="result-icon">🧱</div>
+        <div class="result-content">
+          <div class="result-label">Latest Block (#<span th:text="${latestBlockIndex}">0</span>)</div>
+          <div class="result-value" th:text="${latestBlockHash}">—</div>
+        </div>
+      </div>
+
+      <div class="result-item">
+        <div class="result-icon">✓</div>
+        <div class="result-content">
+          <div class="result-label">Hash Verification</div>
+          <div class="result-value" th:text="${chainValid} ? 'All blocks verified' : 'Hash mismatch detected'">All blocks verified</div>
+        </div>
+      </div>
+
+      <div class="result-item">
+        <div class="result-icon">🔐</div>
+        <div class="result-content">
+          <div class="result-label">Data Integrity</div>
+          <div class="result-value" th:text="${chainValid} ? 'No tampering detected' : 'Unauthorized modifications found'">No tampering detected</div>
+        </div>
+      </div>
+
+      <div class="result-item">
+        <div class="result-icon">⏰</div>
+        <div class="result-content">
+          <div class="result-label">Audit Timestamp</div>
+          <!-- REPLACE the audit timestamp result-value -->
+          <div class="result-value"
+               th:text="${#dates.format(new java.util.Date(), 'dd-MM-yyyy HH:mm:ss')}">
+            2026-04-01 09:15:23
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Message from Controller -->
+    <div class="audit-results" th:if="${auditMessage}">
+      <div class="results-title">📋 Detailed Findings</div>
+      <div style="padding: 1rem; background: #f3f4f6; border-radius: 10px; font-size: 0.9rem; line-height: 1.6; color: #374151;">
+        <p th:text="${auditMessage}">Audit message</p>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="audit-actions">
+      <a th:href="@{/admin/dashboard}" class="btn btn-secondary">← Back to Dashboard</a>
+      <button onclick="location.reload()" class="btn btn-primary">🔄 Re-run Audit</button>
+    </div>
+
+  </div>
+
+</div>
+
+</body>
+</html>

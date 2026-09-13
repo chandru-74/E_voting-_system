@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Voter Registration — Tamil Nadu E-Voting</title>
+  <script>(function(){var t=localStorage.getItem('tn-vote-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})();</script>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800;900&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Mono:wght@400;500&display=swap');
+    :root {
+      --navy:#060E1F; --navy-3:#1A3066; --navy-4:#2A4A8A;
+      --fire:#FF671F; --fire-2:#C94A00; --fire-glow:rgba(255,103,31,0.3);
+      --green:#046A38; --green-light:#f0fdf4;
+      --ink:#060E1F; --ink-2:#2d3748; --muted:#718096; --faint:#a0aec0;
+      --surface:#f7f8fc; --card:#ffffff; --border:#e2e8f0; --border-2:#cbd5e0;
+      --shadow:0 20px 60px rgba(6,14,31,0.12),0 6px 20px rgba(6,14,31,0.07);
+      --red:#dc2626;
+    }
+    [data-theme="dark"] {
+      --ink:#f0f4ff; --ink-2:#cbd5e0; --muted:#94a3b8; --faint:#64748b;
+      --surface:#0a1428; --card:#0f1d3a; --border:#1e3058; --border-2:#2a4070;
+      --green-light:rgba(4,106,56,0.08);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'DM Sans',sans-serif;background:var(--surface);min-height:100vh;color:var(--ink);display:flex;flex-direction:column}
+    .bg-mesh{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 70% 50% at 10% 10%,rgba(255,103,31,0.07) 0%,transparent 60%),radial-gradient(ellipse 60% 50% at 90% 90%,rgba(4,106,56,0.06) 0%,transparent 60%)}
+
+    .ec-header{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:0.875rem 2rem;background:rgba(6,14,31,0.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,0.07)}
+    .ec-left{display:flex;align-items:center;gap:0.875rem}
+    .ec-brand-main{display:block;font-family:'Sora',sans-serif;font-size:0.82rem;font-weight:700;color:rgba(255,255,255,0.95)}
+    .ec-brand-sub{display:block;font-size:0.7rem;color:rgba(255,255,255,0.45);margin-top:0.1rem}
+    .flag-pill{display:flex;height:18px;border-radius:3px;overflow:hidden;border:1px solid rgba(255,255,255,0.2)}
+    .fp-s,.fp-w,.fp-g{width:20px}.fp-s{background:#FF9933}.fp-w{background:#fff}.fp-g{background:#138808}
+
+    .page-body{position:relative;z-index:1;flex:1;display:flex;align-items:flex-start;justify-content:center;padding:2rem 1rem 3rem}
+    .reg-wrap{width:100%;max-width:640px;animation:wrapIn 550ms cubic-bezier(0.22,1,0.36,1) both}
+    @keyframes wrapIn{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
+
+    .progress-bar{display:flex;align-items:center;gap:0;margin-bottom:1.75rem}
+    .progress-step{display:flex;align-items:center;gap:0.5rem;flex:1}
+    .step-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-size:0.75rem;font-weight:700;flex-shrink:0;transition:all 300ms}
+    .step-dot.done{background:var(--green);color:#fff}
+    .step-dot.active{background:var(--fire);color:#fff;box-shadow:0 0 0 4px var(--fire-glow)}
+    .step-dot.pending{background:var(--border);color:var(--faint)}
+    .step-label{font-family:'Sora',sans-serif;font-size:0.68rem;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--muted);transition:color 300ms}
+    .step-label.active{color:var(--fire)}.step-label.done{color:var(--green)}
+    .step-connector{flex:1;height:2px;background:var(--border);margin:0 0.5rem;border-radius:1px;transition:background 300ms}
+    .step-connector.done{background:var(--green)}
+
+    .reg-card{background:var(--card);border:1px solid var(--border);border-radius:24px;box-shadow:var(--shadow);overflow:hidden}
+    .stripe{height:4px;background:linear-gradient(90deg,#FF671F 0% 33.3%,#fff 33.3% 66.6%,#046A38 66.6% 100%)}
+    .card-body{padding:2.5rem 2.25rem}
+
+    .sec-kicker{font-family:'Sora',sans-serif;font-size:0.67rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:var(--fire);margin-bottom:0.35rem}
+    .sec-title{font-family:'Sora',sans-serif;font-size:1.45rem;font-weight:800;color:var(--ink);letter-spacing:-0.025em;margin-bottom:0.3rem}
+    .sec-sub{font-size:0.855rem;color:var(--muted);margin-bottom:1.75rem;line-height:1.55}
+
+    .alert{display:flex;gap:0.75rem;align-items:flex-start;border-radius:10px;padding:0.875rem 1rem;font-size:0.855rem;margin-bottom:1.25rem;line-height:1.5}
+    .alert-error{background:#fef2f2;border:1px solid rgba(220,38,38,0.2);color:var(--red)}
+    .alert-success{background:var(--green-light);border:1px solid rgba(4,106,56,0.2);color:var(--green)}
+    [data-theme="dark"] .alert-error{background:rgba(220,38,38,0.1)}
+    [data-theme="dark"] .alert-success{background:rgba(4,106,56,0.1)}
+
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem 1.25rem;margin-bottom:0.25rem}
+    .field-full{grid-column:1/-1}
+    .field{display:flex;flex-direction:column;gap:0.45rem}
+    .field-label{font-family:'Sora',sans-serif;font-size:0.72rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-2);display:flex;align-items:center;gap:0.4rem}
+    .required-star{color:var(--fire)}
+    .field-wrap{position:relative}
+    .field-icon{position:absolute;left:0.875rem;top:50%;transform:translateY(-50%);font-size:0.95rem;pointer-events:none;z-index:1}
+    .field-input,.field-select{width:100%;padding:0.8rem 0.875rem 0.8rem 2.6rem;border:1.5px solid var(--border);border-radius:10px;background:var(--surface);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:0.9rem;transition:border-color 200ms,box-shadow 200ms,background 200ms;outline:none}
+    .field-input.mono{font-family:'DM Mono',monospace}
+    .field-input:focus,.field-select:focus{border-color:var(--navy-3);box-shadow:0 0 0 3px rgba(26,48,102,0.12);background:var(--card)}
+    .field-input.valid{border-color:var(--green)}
+    .field-input.invalid{border-color:var(--red);box-shadow:0 0 0 3px rgba(220,38,38,0.1)}
+    .field-input::placeholder{color:var(--faint)}
+    .field-hint{font-size:0.72rem;color:var(--faint);margin-top:0.1rem}
+
+    .field-input[type="date"]{
+      padding-left:2.6rem;
+      font-family:'DM Mono',monospace;
+      cursor:pointer;
+    }
+    .field-input[type="date"]::-webkit-calendar-picker-indicator{
+      opacity:0.6;cursor:pointer;
+    }
+
+    .btn-verify {
+      flex-shrink: 0;
+      padding: 0.8rem 1.1rem;
+      border-radius: 10px;
+      border: 1.5px solid var(--navy-3);
+      background: var(--card);
+      color: var(--navy-3);
+      font-family: 'Sora', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 150ms, color 150ms, border-color 150ms, transform 120ms;
+    }
+    .btn-verify:hover { background: var(--navy-3); color: #fff; }
+    .btn-verify:active { transform: scale(0.97); }
+    .btn-verify.verified {
+      border-color: var(--green); background: var(--green); color: #fff;
+    }
+    .btn-verify.invalid-fmt {
+      border-color: var(--red); background: var(--red); color: #fff;
+    }
+    #aadhaarVerifyHint.hint-ok    { color: var(--green); font-weight: 600; }
+    #aadhaarVerifyHint.hint-error { color: var(--red);   font-weight: 600; }
+
+    .gender-pills{display:flex;gap:0.6rem}
+    .gender-pill{flex:1;display:flex;align-items:center;justify-content:center;gap:0.5rem;padding:0.7rem 1rem;border:1.5px solid var(--border);border-radius:10px;font-family:'Sora',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 200ms;color:var(--muted);background:var(--surface)}
+    .gender-pill:has(input:checked){border-color:var(--navy-3);background:rgba(26,48,102,0.07);color:var(--navy-3)}
+    .gender-pill input{display:none}
+
+    .step-panel{display:none}.step-panel.active{display:block;animation:stepIn 350ms cubic-bezier(0.22,1,0.36,1) both}
+    @keyframes stepIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+
+    .form-nav{display:flex;gap:0.875rem;margin-top:1.75rem;padding-top:1.5rem;border-top:1px solid var(--border)}
+    .btn-back{flex:1;padding:0.875rem;border-radius:10px;border:2px solid var(--border-2);background:transparent;color:var(--ink-2);font-family:'Sora',sans-serif;font-size:0.875rem;font-weight:700;cursor:pointer;transition:all 200ms}
+    .btn-back:hover{background:var(--surface);border-color:var(--navy-3);color:var(--navy-3)}
+    .btn-next,.btn-submit{flex:2;padding:0.875rem 1.5rem;border-radius:10px;border:none;background:linear-gradient(135deg,var(--fire),var(--fire-2));color:#fff;font-family:'Sora',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;box-shadow:0 6px 20px var(--fire-glow);transition:transform 150ms,box-shadow 200ms;letter-spacing:0.02em}
+    .btn-next:hover,.btn-submit:hover{transform:translateY(-2px);box-shadow:0 10px 28px var(--fire-glow)}
+    .btn-next:active,.btn-submit:active{transform:scale(0.98)}
+    .btn-next.single,.btn-submit.single{flex:1}
+
+    .review-row{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;padding:0.6rem 0;border-bottom:1px solid var(--border)}
+    .review-row:last-child{border-bottom:none}
+    .review-label{font-family:'Sora',sans-serif;font-size:0.72rem;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--muted);flex-shrink:0}
+    .review-value{font-size:0.9rem;font-weight:600;color:var(--ink);text-align:right;word-break:break-word}
+    .review-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:0.5rem 1.1rem;margin-bottom:0.5rem}
+
+    .login-link{text-align:center;margin-top:1.25rem;font-size:0.845rem;color:var(--muted)}
+    .login-link a{color:var(--navy-3);font-weight:600;text-decoration:none;font-family:'Sora',sans-serif}
+    .login-link a:hover{text-decoration:underline}
+
+    .sec-footer{display:flex;align-items:center;justify-content:center;gap:1.25rem;margin-top:1.5rem;padding:1rem;background:rgba(26,48,102,0.04);border-radius:12px;border:1px solid rgba(26,48,102,0.08)}
+    .sec-item{display:flex;align-items:center;gap:0.4rem;font-size:0.75rem;color:var(--muted)}
+
+    @media(max-width:580px){.form-grid{grid-template-columns:1fr}.card-body{padding:2rem 1.25rem}.gender-pills{flex-direction:column}.form-nav{flex-direction:column}
+      .field-wrap[style*="display:flex"]{flex-direction:column}
+      .btn-verify{width:100%}
+    }
+  </style>
+</head>
+<body>
+<div class="bg-mesh" aria-hidden="true"></div>
+
+<header class="ec-header">
+  <div class="ec-left">
+    <div style="font-size:1.4rem">⚖️</div>
+    <div class="ec-brand">
+      <span class="ec-brand-main">தேர்தல் ஆணையம் · Election Commission of Tamil Nadu</span>
+      <span class="ec-brand-sub">Voter Registration Portal — 2026</span>
+    </div>
+  </div>
+  <div class="flag-pill"><span class="fp-s"></span><span class="fp-w"></span><span class="fp-g"></span></div>
+</header>
+
+<div class="page-body">
+  <div class="reg-wrap">
+
+    <div class="progress-bar" id="progressBar">
+      <div class="progress-step">
+        <div class="step-dot active" id="dot1">1</div>
+        <span class="step-label active" id="lbl1">Identity</span>
+      </div>
+      <div class="step-connector" id="conn1"></div>
+      <div class="progress-step">
+        <div class="step-dot pending" id="dot2">2</div>
+        <span class="step-label" id="lbl2">Personal</span>
+      </div>
+      <div class="step-connector" id="conn2"></div>
+      <div class="progress-step">
+        <div class="step-dot pending" id="dot3">3</div>
+        <span class="step-label" id="lbl3">Location</span>
+      </div>
+      <div class="step-connector" id="conn3"></div>
+      <div class="progress-step">
+        <div class="step-dot pending" id="dot4">4</div>
+        <span class="step-label" id="lbl4">Review</span>
+      </div>
+    </div>
+
+    <div class="reg-card">
+      <div class="stripe"></div>
+      <div class="card-body">
+
+        <div th:if="${error}"   class="alert alert-error"><span>⚠️</span><span th:text="${error}"></span></div>
+        <div th:if="${success}" class="alert alert-success"><span>✅</span><span th:text="${success}"></span></div>
+
+        <form th:action="@{/voter/register}" method="post" id="regForm" th:object="${request}" novalidate>
+
+          <!-- ══ STEP 1 — Identity ══ -->
+          <div class="step-panel active" id="step1">
+            <div class="sec-kicker">Step 1 of 4</div>
+            <h2 class="sec-title">Identity Verification</h2>
+            <p class="sec-sub">Enter your Aadhaar details. Your Aadhaar number is stored only as a secure hash.</p>
+
+            <div class="form-grid">
+              <div class="field field-full">
+                <label class="field-label" for="aadhaar">🪪 Aadhaar Number <span class="required-star">*</span></label>
+                <div class="field-wrap" style="display:flex;gap:0.6rem;align-items:flex-start;">
+                  <div style="position:relative;flex:1;">
+                    <span class="field-icon">🔑</span>
+                    <input type="text" id="aadhaar" th:field="*{aadhaar}" class="field-input mono"
+                           placeholder="12-digit Aadhaar number" maxlength="12"
+                           inputmode="numeric" required/>
+                  </div>
+                  <button type="button" id="verifyAadhaarBtn" class="btn-verify" onclick="verifyAadhaarFormat()">
+                    Verify
+                  </button>
+                </div>
+                <div class="field-hint" id="aadhaarVerifyHint">Your Aadhaar is hashed with SHA-256 and never stored in plain text</div>
+              </div>
+
+              <div class="field field-full">
+                <label class="field-label" for="name">👤 Full Name <span class="required-star">*</span></label>
+                <div class="field-wrap">
+                  <span class="field-icon">✍️</span>
+                  <input type="text" id="name" th:field="*{name}" class="field-input"
+                         placeholder="As per Aadhaar card" required/>
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="field-label" for="mobile">📱 Mobile Number <span class="required-star">*</span></label>
+                <div class="field-wrap">
+                  <span class="field-icon">📞</span>
+                  <input type="tel" id="mobile" th:field="*{mobile}" class="field-input mono"
+                         placeholder="10-digit number" maxlength="10" inputmode="numeric" required/>
+                </div>
+                <div class="field-hint">Used for OTP verification at login</div>
+              </div>
+
+              <div class="field">
+                <label class="field-label" for="email">📧 Email Address</label>
+                <div class="field-wrap">
+                  <span class="field-icon">✉️</span>
+                  <input type="email" id="email" th:field="*{email}" class="field-input"
+                         placeholder="For confirmation email"/>
+                </div>
+                <div class="field-hint" id="emailHint"></div>
+              </div>
+            </div>
+
+            <div class="form-nav">
+              <a th:href="@{/}" class="btn-back" style="text-decoration:none;display:flex;align-items:center;justify-content:center;">🏠 &nbsp;Home</a>
+              <button type="button" class="btn-next" onclick="goStep(2)">Continue &nbsp;→</button>
+            </div>
+          </div>
+
+          <!-- ══ STEP 2 — Personal ══ -->
+          <div class="step-panel" id="step2">
+            <div class="sec-kicker">Step 2 of 4</div>
+            <h2 class="sec-title">Personal Details</h2>
+            <p class="sec-sub">Eligibility is checked automatically. You must be 18 or older to register.</p>
+
+            <div class="form-grid">
+              <div class="field">
+                <label class="field-label" for="dob">🎂 Date of Birth <span class="required-star">*</span></label>
+                <div class="field-wrap">
+                  <span class="field-icon">📅</span>
+                  <input type="date" id="dob" th:field="*{dob}" class="field-input"
+                         min="1900-01-01"
+                         required/>
+                </div>
+                <div class="field-hint" id="ageHint">Must be 18 years or older to vote</div>
+              </div>
+
+              <div class="field">
+                <label class="field-label">⚧ Gender <span class="required-star">*</span></label>
+                <div class="gender-pills">
+                  <label class="gender-pill">
+                    <input type="radio" th:field="*{gender}" value="Male" required/>♂ Male
+                  </label>
+                  <label class="gender-pill">
+                    <input type="radio" th:field="*{gender}" value="Female"/>♀ Female
+                  </label>
+                  <label class="gender-pill">
+                    <input type="radio" th:field="*{gender}" value="Other"/>⚧ Other
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-nav">
+              <button type="button" class="btn-back" onclick="goStep(1)">← Back</button>
+              <button type="button" class="btn-next" onclick="goStep(3)">Continue &nbsp;→</button>
+            </div>
+          </div>
+
+          <!-- ══ STEP 3 — Location ══ -->
+          <div class="step-panel" id="step3">
+            <div class="sec-kicker">Step 3 of 4</div>
+            <h2 class="sec-title">Address &amp; Ward</h2>
+            <p class="sec-sub">Your ward determines which candidates appear on your ballot.</p>
+
+            <div class="form-grid">
+              <div class="field field-full">
+                <label class="field-label" for="address">🏠 Residential Address <span class="required-star">*</span></label>
+                <div class="field-wrap">
+                  <span class="field-icon">📍</span>
+                  <input type="text" id="address" th:field="*{address}" class="field-input"
+                         placeholder="Door No, Street, Area" required/>
+                </div>
+              </div>
+
+              <div class="field field-full">
+                <label class="field-label" for="wardName">🗺️ Ward / Constituency <span class="required-star">*</span></label>
+                <div class="field-wrap">
+                  <span class="field-icon">🏛️</span>
+                  <select id="wardName" th:field="*{wardName}" class="field-select"
+                          style="padding-left:2.6rem" required>
+                    <option value="">— Select your ward —</option>
+                    <option value="Gummidipoondi">Gummidipoondi</option>
+                    <option value="Ponneri">Ponneri</option>
+                    <option value="Tiruttani">Tiruttani</option>
+                    <option value="Thiruvallur">Thiruvallur</option>
+                    <option value="Poonamallee">Poonamallee</option>
+                    <option value="Avadi">Avadi</option>
+                    <option value="Maduravoyal">Maduravoyal</option>
+                    <option value="Ambattur">Ambattur</option>
+                    <option value="Madavaram">Madavaram</option>
+                    <option value="Thiruvottiyur">Thiruvottiyur</option>
+                    <option value="Dr. Radhakrishnan Nagar">Dr. Radhakrishnan Nagar</option>
+                    <option value="Perambur">Perambur</option>
+                    <option value="Kolathur">Kolathur</option>
+                    <option value="Villivakkam">Villivakkam</option>
+                    <option value="Thiru-Vi-Ka-Nagar">Thiru-Vi-Ka-Nagar</option>
+                    <option value="Egmore">Egmore</option>
+                    <option value="Royapuram">Royapuram</option>
+                    <option value="Harbour">Harbour</option>
+                    <option value="Chepauk-Thiruvallikeni">Chepauk-Thiruvallikeni</option>
+                    <option value="Thousand Lights">Thousand Lights</option>
+                    <option value="Anna Nagar">Anna Nagar</option>
+                    <option value="Virugampakkam">Virugampakkam</option>
+                    <option value="Saidapet">Saidapet</option>
+                    <option value="T. Nagar">T. Nagar</option>
+                    <option value="Mylapore">Mylapore</option>
+                    <option value="Velachery">Velachery</option>
+                    <option value="Shozhinganallur">Shozhinganallur</option>
+                    <option value="Alandur">Alandur</option>
+                    <option value="Sriperumbudur">Sriperumbudur</option>
+                    <option value="Pallavaram">Pallavaram</option>
+                    <option value="Tambaram">Tambaram</option>
+                    <option value="Chengalpattu">Chengalpattu</option>
+                    <option value="Thiruporur">Thiruporur</option>
+                    <option value="Cheyyur">Cheyyur</option>
+                    <option value="Madurantakam">Madurantakam</option>
+                    <option value="Uthiramerur">Uthiramerur</option>
+                    <option value="Kancheepuram">Kancheepuram</option>
+                    <option value="Arakkonam">Arakkonam</option>
+                    <option value="Sholingur">Sholingur</option>
+                    <option value="Katpadi">Katpadi</option>
+                    <option value="Ranipet">Ranipet</option>
+                    <option value="Arcot">Arcot</option>
+                    <option value="Vellore">Vellore</option>
+                    <option value="Anaikattu">Anaikattu</option>
+                    <option value="Kilvaithinankuppam">Kilvaithinankuppam</option>
+                    <option value="Gudiyattam">Gudiyattam</option>
+                    <option value="Vaniyambadi">Vaniyambadi</option>
+                    <option value="Ambur">Ambur</option>
+                    <option value="Jolarpet">Jolarpet</option>
+                    <option value="Tirupattur">Tirupattur</option>
+                    <option value="Uthangarai">Uthangarai</option>
+                    <option value="Bargur">Bargur</option>
+                    <option value="Krishnagiri">Krishnagiri</option>
+                    <option value="Veppanahalli">Veppanahalli</option>
+                    <option value="Hosur">Hosur</option>
+                    <option value="Thalli">Thalli</option>
+                    <option value="Palacode">Palacode</option>
+                    <option value="Pennagaram">Pennagaram</option>
+                    <option value="Dharmapuri">Dharmapuri</option>
+                    <option value="Pappireddippatti">Pappireddippatti</option>
+                    <option value="Harur">Harur</option>
+                    <option value="Chengam">Chengam</option>
+                    <option value="Tiruvannamalai">Tiruvannamalai</option>
+                    <option value="Kilpennathur">Kilpennathur</option>
+                    <option value="Kalasapakkam">Kalasapakkam</option>
+                    <option value="Polur">Polur</option>
+                    <option value="Arani">Arani</option>
+                    <option value="Cheyyar">Cheyyar</option>
+                    <option value="Vandavasi">Vandavasi</option>
+                    <option value="Gingee">Gingee</option>
+                    <option value="Mailam">Mailam</option>
+                    <option value="Tindivanam">Tindivanam</option>
+                    <option value="Vanur">Vanur</option>
+                    <option value="Villupuram">Villupuram</option>
+                    <option value="Vikravandi">Vikravandi</option>
+                    <option value="Tirukkoyilur">Tirukkoyilur</option>
+                    <option value="Ulundurpettai">Ulundurpettai</option>
+                    <option value="Rishivandiyam">Rishivandiyam</option>
+                    <option value="Sankarapuram">Sankarapuram</option>
+                    <option value="Kallakurichi">Kallakurichi</option>
+                    <option value="Gangavalli">Gangavalli</option>
+                    <option value="Attur">Attur</option>
+                    <option value="Yercaud">Yercaud</option>
+                    <option value="Omalur">Omalur</option>
+                    <option value="Mettur">Mettur</option>
+                    <option value="Edappadi">Edappadi</option>
+                    <option value="Sankari">Sankari</option>
+                    <option value="Salem (West)">Salem (West)</option>
+                    <option value="Salem (North)">Salem (North)</option>
+                    <option value="Salem (South)">Salem (South)</option>
+                    <option value="Veerapandi">Veerapandi</option>
+                    <option value="Rasipuram">Rasipuram</option>
+                    <option value="Senthamangalam">Senthamangalam</option>
+                    <option value="Namakkal">Namakkal</option>
+                    <option value="Paramathi-Velur">Paramathi-Velur</option>
+                    <option value="Tiruchengodu">Tiruchengodu</option>
+                    <option value="Kumarapalayam">Kumarapalayam</option>
+                    <option value="Erode (East)">Erode (East)</option>
+                    <option value="Erode (West)">Erode (West)</option>
+                    <option value="Modakkurichi">Modakkurichi</option>
+                    <option value="Dharapuram">Dharapuram</option>
+                    <option value="Kangayam">Kangayam</option>
+                    <option value="Perundurai">Perundurai</option>
+                    <option value="Bhavani">Bhavani</option>
+                    <option value="Anthiyur">Anthiyur</option>
+                    <option value="Gobichettipalayam">Gobichettipalayam</option>
+                    <option value="Bhavanisagar">Bhavanisagar</option>
+                    <option value="Udhagamandalam">Udhagamandalam</option>
+                    <option value="Gudalur">Gudalur</option>
+                    <option value="Coonoor">Coonoor</option>
+                    <option value="Mettupalayam">Mettupalayam</option>
+                    <option value="Avanashi">Avanashi</option>
+                    <option value="Tiruppur (North)">Tiruppur (North)</option>
+                    <option value="Tiruppur (South)">Tiruppur (South)</option>
+                    <option value="Palladam">Palladam</option>
+                    <option value="Sulur">Sulur</option>
+                    <option value="Kavundampalayam">Kavundampalayam</option>
+                    <option value="Coimbatore (North)">Coimbatore (North)</option>
+                    <option value="Thondamuthur">Thondamuthur</option>
+                    <option value="Coimbatore (South)">Coimbatore (South)</option>
+                    <option value="Singanallur">Singanallur</option>
+                    <option value="Kinathukadavu">Kinathukadavu</option>
+                    <option value="Pollachi">Pollachi</option>
+                    <option value="Valparai">Valparai</option>
+                    <option value="Udumalaipettai">Udumalaipettai</option>
+                    <option value="Madathukulam">Madathukulam</option>
+                    <option value="Palani">Palani</option>
+                    <option value="Oddanchatram">Oddanchatram</option>
+                    <option value="Athoor">Athoor</option>
+                    <option value="Nilakkottai">Nilakkottai</option>
+                    <option value="Natham">Natham</option>
+                    <option value="Dindigul">Dindigul</option>
+                    <option value="Vedasandur">Vedasandur</option>
+                    <option value="Aravakurichi">Aravakurichi</option>
+                    <option value="Karur">Karur</option>
+                    <option value="Krishnarayapuram">Krishnarayapuram</option>
+                    <option value="Kulithalai">Kulithalai</option>
+                    <option value="Manapparai">Manapparai</option>
+                    <option value="Srirangam">Srirangam</option>
+                    <option value="Tiruchirappalli (West)">Tiruchirappalli (West)</option>
+                    <option value="Tiruchirappalli (East)">Tiruchirappalli (East)</option>
+                    <option value="Thiruverumbur">Thiruverumbur</option>
+                    <option value="Lalgudi">Lalgudi</option>
+                    <option value="Manachanallur">Manachanallur</option>
+                    <option value="Musiri">Musiri</option>
+                    <option value="Thuraiyur">Thuraiyur</option>
+                    <option value="Perambalur">Perambalur</option>
+                    <option value="Kunnam">Kunnam</option>
+                    <option value="Ariyalur">Ariyalur</option>
+                    <option value="Jayankondam">Jayankondam</option>
+                    <option value="Tittakudi">Tittakudi</option>
+                    <option value="Vriddhachalam">Vriddhachalam</option>
+                    <option value="Neyveli">Neyveli</option>
+                    <option value="Panruti">Panruti</option>
+                    <option value="Cuddalore">Cuddalore</option>
+                    <option value="Kurinjipadi">Kurinjipadi</option>
+                    <option value="Bhuvanagiri">Bhuvanagiri</option>
+                    <option value="Chidambaram">Chidambaram</option>
+                    <option value="Kattumannarkoil">Kattumannarkoil</option>
+                    <option value="Sirkazhi">Sirkazhi</option>
+                    <option value="Mayiladuthurai">Mayiladuthurai</option>
+                    <option value="Poompuhar">Poompuhar</option>
+                    <option value="Nagapattinam">Nagapattinam</option>
+                    <option value="Kilvelur">Kilvelur</option>
+                    <option value="Vedaranyam">Vedaranyam</option>
+                    <option value="Thiruthuraipoondi">Thiruthuraipoondi</option>
+                    <option value="Mannargudi">Mannargudi</option>
+                    <option value="Thiruvarur">Thiruvarur</option>
+                    <option value="Nannilam">Nannilam</option>
+                    <option value="Thiruvidaimarudur">Thiruvidaimarudur</option>
+                    <option value="Kumbakonam">Kumbakonam</option>
+                    <option value="Papanasam">Papanasam</option>
+                    <option value="Thiruvaiyaru">Thiruvaiyaru</option>
+                    <option value="Thanjavur">Thanjavur</option>
+                    <option value="Orathanadu">Orathanadu</option>
+                    <option value="Pattukkottai">Pattukkottai</option>
+                    <option value="Peravurani">Peravurani</option>
+                    <option value="Gandharvakottai">Gandharvakottai</option>
+                    <option value="Viralimalai">Viralimalai</option>
+                    <option value="Pudukkottai">Pudukkottai</option>
+                    <option value="Thirumayam">Thirumayam</option>
+                    <option value="Alangudi">Alangudi</option>
+                    <option value="Aranthangi">Aranthangi</option>
+                    <option value="Karaikudi">Karaikudi</option>
+                    <option value="Tiruppattur">Tiruppattur</option>
+                    <option value="Sivaganga">Sivaganga</option>
+                    <option value="Manamadurai">Manamadurai</option>
+                    <option value="Melur">Melur</option>
+                    <option value="Madurai East">Madurai East</option>
+                    <option value="Sholavandan">Sholavandan</option>
+                    <option value="Madurai North">Madurai North</option>
+                    <option value="Madurai South">Madurai South</option>
+                    <option value="Madurai Central">Madurai Central</option>
+                    <option value="Madurai West">Madurai West</option>
+                    <option value="Thiruparankundram">Thiruparankundram</option>
+                    <option value="Tirumangalam">Tirumangalam</option>
+                    <option value="Usilampatti">Usilampatti</option>
+                    <option value="Andipatti">Andipatti</option>
+                    <option value="Periyakulam">Periyakulam</option>
+                    <option value="Bodinayakanur">Bodinayakanur</option>
+                    <option value="Cumbum">Cumbum</option>
+                    <option value="Rajapalayam">Rajapalayam</option>
+                    <option value="Srivilliputhur">Srivilliputhur</option>
+                    <option value="Sattur">Sattur</option>
+                    <option value="Sivakasi">Sivakasi</option>
+                    <option value="Virudhunagar">Virudhunagar</option>
+                    <option value="Aruppukkottai">Aruppukkottai</option>
+                    <option value="Tiruchuli">Tiruchuli</option>
+                    <option value="Paramakudi">Paramakudi</option>
+                    <option value="Tiruvadanai">Tiruvadanai</option>
+                    <option value="Ramanathapuram">Ramanathapuram</option>
+                    <option value="Mudhukulathur">Mudhukulathur</option>
+                    <option value="Vilathikulam">Vilathikulam</option>
+                    <option value="Thoothukkudi">Thoothukkudi</option>
+                    <option value="Tiruchendur">Tiruchendur</option>
+                    <option value="Srivaikuntam">Srivaikuntam</option>
+                    <option value="Ottapidaram">Ottapidaram</option>
+                    <option value="Kovilpatti">Kovilpatti</option>
+                    <option value="Sankarankovil">Sankarankovil</option>
+                    <option value="Vasudevanallur">Vasudevanallur</option>
+                    <option value="Kadayanallur">Kadayanallur</option>
+                    <option value="Tenkasi">Tenkasi</option>
+                    <option value="Alangulam">Alangulam</option>
+                    <option value="Tirunelveli">Tirunelveli</option>
+                    <option value="Ambasamudram">Ambasamudram</option>
+                    <option value="Palayamkottai">Palayamkottai</option>
+                    <option value="Nanguneri">Nanguneri</option>
+                    <option value="Radhapuram">Radhapuram</option>
+                    <option value="Kanniyakumari">Kanniyakumari</option>
+                    <option value="Nagercoil">Nagercoil</option>
+                    <option value="Colachel">Colachel</option>
+                    <option value="Padmanabhapuram">Padmanabhapuram</option>
+                    <option value="Vilavancode">Vilavancode</option>
+                    <option value="Killiyoor">Killiyoor</option>
+                  </select>
+                </div>
+                <div class="field-hint">Select the ward matching your registered address</div>
+              </div>
+            </div>
+
+            <div class="form-nav">
+              <button type="button" class="btn-back" onclick="goStep(2)">← Back</button>
+              <button type="button" class="btn-next" onclick="showReview()">Review &nbsp;→</button>
+            </div>
+          </div>
+
+          <!-- ══ STEP 4 — Review & Confirm ══ -->
+          <div class="step-panel" id="step4">
+            <div class="sec-kicker">Step 4 of 4</div>
+            <h2 class="sec-title">Review Your Details</h2>
+            <p class="sec-sub">Please check everything carefully. You can go back and edit any section before submitting.</p>
+
+            <div class="review-box" id="reviewBox">
+              <!-- populated by showReview() in the script below -->
+            </div>
+
+            <div class="form-nav">
+              <button type="button" class="btn-back" onclick="goStep(3)">← Edit</button>
+              <button type="submit" class="btn-submit" id="submitBtn">✓ &nbsp;Confirm &amp; Submit</button>
+            </div>
+          </div>
+
+        </form>
+
+        <div class="sec-footer">
+          <div class="sec-item">🔒 SHA-256 Hashed</div>
+          <div class="sec-item">✅ Auto-Approved</div>
+          <div class="sec-item">⛓️ Blockchain Backed</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    'use strict';
+
+    var currentStep = 1;
+    var aadhaarVerified = false;
+
+    (function setDobBounds() {
+      var dob = document.getElementById('dob');
+      var today = new Date();
+      var maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+      var minDate = new Date(1900, 0, 1);
+
+      function toDateString(d) {
+        var y = d.getFullYear();
+        var m = String(d.getMonth() + 1).padStart(2, '0');
+        var day = String(d.getDate()).padStart(2, '0');
+        return y + '-' + m + '-' + day;
+      }
+
+      dob.setAttribute('max', toDateString(maxDate));
+      dob.setAttribute('min', toDateString(minDate));
+    })();
+
+    function shake(el) {
+      el.classList.add('invalid');
+      el.animate(
+        [{transform:'translateX(-5px)'},{transform:'translateX(5px)'},{transform:'none'}],
+        {duration:300}
+      );
+      setTimeout(function(){ el.classList.remove('invalid'); }, 2000);
+    }
+
+    function getAge(dobStr) {
+      var d = new Date(dobStr);
+      var today = new Date();
+      var age = today.getFullYear() - d.getFullYear();
+      var m = today.getMonth() - d.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < d.getDate())) age--;
+      return age;
+    }
+
+    function looksLikeAadhaarShape(value) {
+      return /^[2-9]\d{11}$/.test(value);
+    }
+
+    window.verifyAadhaarFormat = function () {
+      var input = document.getElementById('aadhaar');
+      var btn   = document.getElementById('verifyAadhaarBtn');
+      var hint  = document.getElementById('aadhaarVerifyHint');
+      var raw   = input.value.trim();
+
+      btn.classList.remove('verified', 'invalid-fmt');
+      hint.classList.remove('hint-ok', 'hint-error');
+
+      if (raw.length === 0) {
+        hint.textContent = '⚠️ Enter your Aadhaar number first';
+        hint.classList.add('hint-error');
+        input.classList.add('invalid');
+        aadhaarVerified = false;
+        return;
+      }
+
+      if (!looksLikeAadhaarShape(raw)) {
+        aadhaarVerified = false;
+        input.classList.remove('valid');
+        input.classList.add('invalid');
+        btn.classList.add('invalid-fmt');
+        btn.textContent = '✗ Invalid';
+        shake(input);
+        if (raw.length !== 12) {
+          hint.textContent = '❌ Aadhaar must be exactly 12 digits (you entered ' + raw.length + ')';
+        } else {
+          hint.textContent = '❌ Aadhaar numbers never start with 0 or 1 — check for a typo';
+        }
+        hint.classList.add('hint-error');
+        setTimeout(function () {
+          btn.classList.remove('invalid-fmt');
+          btn.textContent = 'Verify';
+        }, 2200);
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Checking…';
+      hint.textContent = 'Verifying checksum…';
+      hint.classList.remove('hint-ok', 'hint-error');
+
+      fetch('/voter/verify-aadhaar?aadhaar=' + encodeURIComponent(raw))
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          btn.disabled = false;
+          if (data.valid) {
+            aadhaarVerified = true;
+            input.classList.remove('invalid');
+            input.classList.add('valid');
+            btn.classList.add('verified');
+            btn.textContent = '✓ Verified';
+            hint.textContent = '✅ Valid Aadhaar format and checksum';
+            hint.classList.add('hint-ok');
+          } else {
+            aadhaarVerified = false;
+            input.classList.remove('valid');
+            input.classList.add('invalid');
+            btn.classList.add('invalid-fmt');
+            btn.textContent = '✗ Invalid';
+            shake(input);
+            hint.textContent = '❌ ' + (data.reason || 'Not a valid Aadhaar number');
+            hint.classList.add('hint-error');
+            setTimeout(function () {
+              btn.classList.remove('invalid-fmt');
+              btn.textContent = 'Verify';
+            }, 2200);
+          }
+        })
+        .catch(function () {
+          btn.disabled = false;
+          btn.textContent = 'Verify';
+          hint.textContent = '⚠️ Could not reach the server to verify. Please try again.';
+          hint.classList.add('hint-error');
+          aadhaarVerified = false;
+        });
+    };
+
+    document.getElementById('aadhaar').addEventListener('input', function(){
+      this.value = this.value.replace(/\D/g,'').slice(0,12);
+      if (aadhaarVerified) {
+        aadhaarVerified = false;
+        var btn = document.getElementById('verifyAadhaarBtn');
+        btn.classList.remove('verified', 'invalid-fmt');
+        btn.textContent = 'Verify';
+        this.classList.remove('valid', 'invalid');
+        document.getElementById('aadhaarVerifyHint').textContent =
+          'Your Aadhaar is hashed with SHA-256 and never stored in plain text';
+        document.getElementById('aadhaarVerifyHint').classList.remove('hint-ok', 'hint-error');
+      }
+    });
+
+    function validateStep(step) {
+      var ok = true;
+      if (step === 1) {
+        var aadhaar = document.getElementById('aadhaar');
+        var name    = document.getElementById('name');
+        var mobile  = document.getElementById('mobile');
+        var email   = document.getElementById('email');
+        var emailHint = document.getElementById('emailHint');
+
+        if (!looksLikeAadhaarShape(aadhaar.value.trim())) {
+          shake(aadhaar);
+          ok = false;
+        } else if (!aadhaarVerified) {
+          var hint = document.getElementById('aadhaarVerifyHint');
+          hint.textContent = '⚠️ Please click "Verify" to confirm your Aadhaar format';
+          hint.classList.add('hint-error');
+          document.getElementById('verifyAadhaarBtn').animate(
+            [{transform:'scale(1)'},{transform:'scale(1.08)'},{transform:'scale(1)'}],
+            {duration:300}
+          );
+          ok = false;
+        }
+
+        if (!name.value.trim())                       { shake(name);    ok = false; }
+        if (!/^[6-9]\d{9}$/.test(mobile.value.trim())){ shake(mobile);  ok = false; }
+
+        var emailVal = email.value.trim();
+        if (emailVal) {
+          var validEmailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!validEmailPattern.test(emailVal)) {
+            shake(email);
+            if (emailHint) {
+              emailHint.textContent = '❌ Please enter a valid email address (e.g. name@gmail.com)';
+              emailHint.style.color = '#dc2626';
+            }
+            ok = false;
+          } else if (emailHint) {
+            emailHint.textContent = '';
+          }
+        } else if (emailHint) {
+          emailHint.textContent = '';
+        }
+      }
+
+      if (step === 3) {
+        var address = document.getElementById('address');
+        var ward = document.getElementById('wardName');
+        if (!address.value.trim()) { shake(address); ok = false; }
+        if (!ward.value)           { shake(ward);    ok = false; }
+      }
+
+      return ok;
+    }
+
+    function goStep(n) {
+      if (n > currentStep && !validateStep(currentStep)) return;
+      document.getElementById('step' + currentStep).classList.remove('active');
+      document.getElementById('step' + n).classList.add('active');
+      updateProgress(currentStep, n);
+      currentStep = n;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function updateProgress(from, to) {
+      for (var i = 1; i <= 4; i++) {
+        var dot = document.getElementById('dot' + i);
+        var lbl = document.getElementById('lbl' + i);
+        dot.className = 'step-dot ' + (i < to ? 'done' : i === to ? 'active' : 'pending');
+        dot.textContent = i < to ? '✓' : String(i);
+        lbl.className = 'step-label ' + (i < to ? 'done' : i === to ? 'active' : '');
+        if (i < 4) {
+          document.getElementById('conn' + i).className =
+            'step-connector ' + (i < to ? 'done' : '');
+        }
+      }
+    }
+
+    // Builds the read-only review panel from the fields already typed
+    // into steps 1–3, then advances to step 4. Nothing here talks to the
+    // server — it's purely reading values already sitting in the DOM.
+    window.showReview = function () {
+      if (!validateStep(3)) return;
+
+      var genderInput = document.querySelector('input[name="gender"]:checked');
+      var aadhaarVal = document.getElementById('aadhaar').value.trim();
+      var maskedAadhaar = aadhaarVal.length === 12
+        ? '•••• •••• ' + aadhaarVal.slice(-4)
+        : aadhaarVal;
+
+      var rows = [
+        ['Full Name',      document.getElementById('name').value.trim()],
+        ['Aadhaar Number', maskedAadhaar],
+        ['Mobile Number',  document.getElementById('mobile').value.trim()],
+        ['Email',          document.getElementById('email').value.trim() || '—'],
+        ['Date of Birth',  document.getElementById('dob').value || '—'],
+        ['Gender',         genderInput ? genderInput.value : '—'],
+        ['Address',        document.getElementById('address').value.trim()],
+        ['Ward / Constituency', document.getElementById('wardName').value || '—']
+      ];
+
+      var box = document.getElementById('reviewBox');
+      box.innerHTML = rows.map(function (r) {
+        return '<div class="review-row">' +
+                 '<span class="review-label">' + r[0] + '</span>' +
+                 '<span class="review-value">' + r[1] + '</span>' +
+               '</div>';
+      }).join('');
+
+      goStep(4);
+    };
+
+    document.getElementById('mobile').addEventListener('input', function(){
+      this.value = this.value.replace(/\D/g,'').slice(0,10);
+    });
+
+    document.getElementById('dob').addEventListener('change', function(){
+      var hint = document.getElementById('ageHint');
+      if (!this.value) {
+        hint.textContent = 'Must be 18 years or older to vote';
+        hint.style.color = '';
+        return;
+      }
+      var age = getAge(this.value);
+      if (age >= 18) {
+        hint.textContent = '✅  Age: ' + age + ' years — eligible to vote';
+        hint.style.color = 'var(--green)';
+      } else {
+        hint.textContent = '❌  Age: ' + age + ' years — minimum age is 18';
+        hint.style.color = 'var(--red)';
+      }
+    });
+
+    document.getElementById('email').addEventListener('blur', function(){
+      var val = this.value.trim();
+      var hint = document.getElementById('emailHint');
+      if (!hint) return;
+      var commonDomains = ['gmail.com','yahoo.com','outlook.com','hotmail.com'];
+      var domain = val.split('@')[1];
+      if (domain && !commonDomains.includes(domain)) {
+        var typoLike = commonDomains.find(function(d){
+          return domain.replace(/[^a-z]/g,'') === d.replace(/[^a-z]/g,'');
+        });
+        if (typoLike) {
+          hint.textContent = '⚠️ Did you mean ' + typoLike + '?';
+          hint.style.color = '#dc2626';
+        } else {
+          hint.textContent = '';
+        }
+      } else {
+        hint.textContent = '';
+      }
+    });
+
+    document.getElementById('regForm').addEventListener('submit', function(){
+      var btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Submitting…';
+    });
+
+    window.goStep = goStep;
+  })();
+</script>
+</body>
+</html>

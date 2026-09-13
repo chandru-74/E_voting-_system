@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Final election results">
+    <title>Final Results - E-Voting System</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .results-container {
+            padding: 2rem 0;
+        }
+
+        .results-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .results-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #60a5fa, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0 0 1rem 0;
+        }
+
+        .results-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+        }
+
+        .winner-section {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            border-radius: 16px;
+            padding: 3rem 2rem;
+            margin-bottom: 3rem;
+            text-align: center;
+            box-shadow: var(--shadow-xl);
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .winner-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            animation: moveBackground 20s linear infinite;
+        }
+
+        @keyframes moveBackground {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(20px, 20px); }
+        }
+
+        .winner-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .winner-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.5rem 1.25rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            border: 2px solid white;
+            backdrop-filter: blur(10px);
+        }
+
+        .winner-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            display: block;
+            animation: bounce 0.6s ease-out;
+        }
+
+        @keyframes bounce {
+            0% {
+                opacity: 0;
+                transform: scale(0.3) translateY(10px);
+            }
+            50% {
+                opacity: 1;
+            }
+            70% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .winner-name {
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+            margin: 0 0 1rem 0;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .winner-votes {
+            font-size: 1.5rem;
+            color: rgba(255, 255, 255, 0.95);
+            margin: 0;
+        }
+
+        .results-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .results-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+            border: 2px solid var(--border);
+            padding: 1.5rem;
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow);
+        }
+
+        .result-card:hover {
+            border-color: var(--primary-light);
+            transform: translateX(4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .result-card.winner {
+            border-color: #fbbf24;
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.05), rgba(245, 158, 11, 0.05));
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .rank-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 3rem;
+            height: 3rem;
+            background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary));
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+
+        .rank-badge.first {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            border-color: #d97706;
+            color: white;
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+        }
+
+        .rank-badge.second {
+            background: linear-gradient(135deg, #d1d5db, #9ca3af);
+            border-color: #6b7280;
+            color: #1f2937;
+        }
+
+        .rank-badge.third {
+            background: linear-gradient(135deg, #e2beaa, #d2691e);
+            border-color: #8b4513;
+            color: white;
+        }
+
+        .candidate-info {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            min-width: 0;
+        }
+
+        .candidate-avatar {
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+
+        .candidate-details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .candidate-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .candidate-party {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin: 0.25rem 0 0 0;
+        }
+
+        .vote-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-shrink: 0;
+        }
+
+        .vote-badge {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        .vote-count {
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        .vote-label {
+            font-size: 0.7rem;
+            opacity: 0.9;
+            margin-top: 0.25rem;
+        }
+
+        .progress-section {
+            margin-top: 1rem;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .progress-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .progress-percentage {
+            color: var(--primary-light);
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+            border-radius: 6px;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            min-width: 2px;
+        }
+
+        .result-footer {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.85rem 1.75rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 2px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary-light);
+            color: var(--primary-light);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-card {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .result-card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .result-card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .result-card:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        @media (max-width: 768px) {
+            .results-title {
+                font-size: 1.75rem;
+            }
+
+            .winner-section {
+                padding: 2rem 1.5rem;
+            }
+
+            .winner-name {
+                font-size: 1.5rem;
+            }
+
+            .winner-icon {
+                font-size: 3rem;
+            }
+
+            .result-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .vote-info {
+                width: 100%;
+                margin-top: 1rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .results-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .candidate-name {
+                font-size: 0.95rem;
+            }
+
+            .vote-count {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container results-container">
+    <div class="results-header">
+        <h1 class="results-title">🏁 Final Results</h1>
+        <p class="results-subtitle">Election has concluded. Here are the official final results.</p>
+    </div>
+
+    <!-- Calculate and display winner -->
+    <th:block th:with="maxVotes=${#lists.isEmpty(results) ? 0 : results.stream().map(r -> r.votes).max().orElse(0)}, winner=${#lists.isEmpty(results) ? null : results.stream().filter(r -> r.votes == maxVotes).findFirst().orElse(null)}">
+        <!-- Winner Section -->
+        <th:block th:if="${winner != null}">
+            <div class="winner-section">
+                <div class="winner-content">
+                    <span class="winner-badge">🎯 ELECTION WINNER</span>
+                    <span class="winner-icon">🏆</span>
+                    <h2 class="winner-name" th:text="${winner.name}">Candidate Name</h2>
+                    <p class="winner-votes" th:text="${'Total Votes: ' + winner.votes}">Total Votes: 0</p>
+                </div>
+            </div>
+        </th:block>
+
+        <!-- Statistics -->
+        <div class="results-stats">
+            <div class="stat-card">
+                <div class="stat-label">Total Votes Cast</div>
+                <div class="stat-value" id="totalVotes" th:text="${results.stream().mapToInt(r -> r.votes).sum()}">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Candidates</div>
+                <div class="stat-value" th:text="${results.size()}">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Participation Rate</div>
+                <div class="stat-value" id="participationRate">100%</div>
+            </div>
+        </div>
+
+        <!-- Results Table -->
+        <div class="results-list">
+            <th:block th:each="result, iterStat : ${#lists.sort(results, 'votes').stream().sorted(#{ T(java.util.Comparator).comparingInt(r -> -r.votes) }.toList())}">
+                <div class="result-card" th:classappend="${iterStat.index == 0 ? 'winner' : ''}">
+                    <div class="result-header">
+                        <div class="rank-badge" th:classappend="${iterStat.index == 0 ? 'first' : iterStat.index == 1 ? 'second' : iterStat.index == 2 ? 'third' : ''}"
+                             th:text="${iterStat.index + 1}">1</div>
+
+                        <div class="candidate-info">
+                            <span class="candidate-avatar" aria-hidden="true">👤</span>
+                            <div class="candidate-details">
+                                <h3 class="candidate-name" th:text="${result.name}">Candidate Name</h3>
+                            </div>
+                        </div>
+
+                        <div class="vote-info">
+                            <div class="vote-badge">
+                                <div class="vote-count" th:text="${result.votes}">0</div>
+                                <div class="vote-label">VOTES</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="progress-section">
+                        <div class="progress-header">
+                            <span class="progress-label">Vote Share</span>
+                            <span class="progress-percentage"
+                                  th:text="${maxVotes > 0 ? T(java.lang.String).format('%.1f%%', (result.votes * 100.0 / maxVotes)) : '0%'}">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill"
+                                 th:style="${'width: ' + (maxVotes > 0 ? T(java.lang.Math).max(2, result.votes * 100.0 / maxVotes) : 0) + '%;'}"></div>
+                        </div>
+                    </div>
+
+                    <th:block th:if="${iterStat.index == 0}">
+                        <div class="result-footer">
+                            ✓ Elected as the representative
+                        </div>
+                    </th:block>
+                </div>
+            </th:block>
+        </div>
+    </th:block>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <a href="/voter" class="btn btn-secondary">
+            <span>🏠</span> Back to Home
+        </a>
+        <button class="btn btn-primary" onclick="window.print()">
+            <span>🖨️</span> Print Results
+        </button>
+    </div>
+</div>
+
+<script>
+    // Calculate and display participation rate
+    document.addEventListener('DOMContentLoaded', function() {
+        const totalVotesEl = document.getElementById('totalVotes');
+        const participationEl = document.getElementById('participationRate');
+
+        if (totalVotesEl) {
+            const totalVotes = parseInt(totalVotesEl.textContent);
+            // Assuming standard voter base, you can adjust this
+            const estimatedVoters = totalVotes > 0 ? totalVotes : 100;
+            const participationRate = Math.round((totalVotes / estimatedVoters) * 100);
+            participationEl.textContent = participationRate + '%';
+        }
+    });
+
+    // Print functionality
+    window.addEventListener('beforeprint', function() {
+        document.body.style.background = 'white';
+        document.querySelectorAll('.container').forEach(el => {
+            el.style.background = 'white';
+        });
+    });
+
+    window.addEventListener('afterprint', function() {
+        document.body.style.background = '';
+    });
+</script>
+</body>
+</html>

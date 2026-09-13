@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Voter Login — Tamil Nadu E-Voting</title>
+    <script>(function(){var t=localStorage.getItem('tn-vote-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})();</script>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Mono:wght@400;500&display=swap');
+
+        :root {
+          --navy: #060E1F; --navy-2: #0C1A3E; --navy-3: #1A3066; --navy-4: #2A4A8A;
+          --fire: #FF671F; --fire-2: #C94A00; --fire-glow: rgba(255,103,31,0.35);
+          --green: #046A38; --gold: #C8960C;
+          --ink: #060E1F; --ink-2: #2d3748; --muted: #718096; --faint: #a0aec0;
+          --surface: #f7f8fc; --card: #ffffff; --border: #e2e8f0; --border-2: #cbd5e0;
+          --shadow: 0 20px 60px rgba(6,14,31,0.12), 0 6px 20px rgba(6,14,31,0.07);
+          --shadow-sm: 0 4px 14px rgba(6,14,31,0.08);
+        }
+        [data-theme="dark"] {
+          --ink: #f0f4ff; --ink-2: #cbd5e0; --muted: #94a3b8; --faint: #64748b;
+          --surface: #0a1428; --card: #0f1d3a; --border: #1e3058; --border-2: #2a4070;
+          --shadow: 0 20px 60px rgba(0,0,0,0.5), 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+          font-family: 'DM Sans', sans-serif;
+          background: var(--surface);
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+          color: var(--ink);
+        }
+
+        .bg-mesh {
+          position: fixed; inset: 0; z-index: 0; pointer-events: none;
+          background:
+            radial-gradient(ellipse 80% 60% at 15% 15%, rgba(255,103,31,0.08) 0%, transparent 60%),
+            radial-gradient(ellipse 60% 50% at 85% 85%, rgba(4,106,56,0.07) 0%, transparent 60%),
+            radial-gradient(ellipse 50% 40% at 50% 50%, rgba(26,48,102,0.05) 0%, transparent 70%);
+        }
+        .bg-grid {
+          position: fixed; inset: 0; z-index: 0; pointer-events: none;
+          background-image:
+            linear-gradient(rgba(26,48,102,0.04) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(26,48,102,0.04) 1px, transparent 1px);
+          background-size: 40px 40px;
+        }
+
+        .ec-header {
+          position: relative; z-index: 10;
+          display: flex; align-items: center; justify-content: space-between;
+          padding: 0.875rem 2rem;
+          background: rgba(6,14,31,0.95);
+          backdrop-filter: blur(12px);
+          border-bottom: 1px solid rgba(255,255,255,0.07);
+        }
+        .ec-left { display: flex; align-items: center; gap: 0.875rem; }
+        .ec-emblem { font-size: 1.4rem; }
+        .ec-brand-main { display: block; font-family: 'Sora', sans-serif; font-size: 0.82rem; font-weight: 700; color: rgba(255,255,255,0.95); letter-spacing: 0.01em; }
+        .ec-brand-sub  { display: block; font-size: 0.7rem; color: rgba(255,255,255,0.45); margin-top: 0.1rem; }
+        .flag-pill { display: flex; height: 18px; border-radius: 3px; overflow: hidden; border: 1px solid rgba(255,255,255,0.2); }
+        .fp-s,.fp-w,.fp-g { width: 20px; }
+        .fp-s { background: #FF9933; } .fp-w { background: #fff; } .fp-g { background: #138808; }
+
+        .page-body {
+          position: relative; z-index: 1;
+          flex: 1; display: flex; align-items: center; justify-content: center;
+          padding: 2rem 1rem;
+        }
+
+        .login-wrap {
+          width: 100%; max-width: 960px;
+          display: grid; grid-template-columns: 1fr 1fr;
+          gap: 0; border-radius: 24px; overflow: hidden;
+          box-shadow: var(--shadow);
+          animation: wrapIn 600ms cubic-bezier(0.22,1,0.36,1) both;
+        }
+        @keyframes wrapIn { from{opacity:0;transform:translateY(32px) scale(0.97)} to{opacity:1;transform:none} }
+
+        .login-panel-left {
+          background: linear-gradient(145deg, var(--navy) 0%, var(--navy-3) 60%, #0d2048 100%);
+          padding: 3rem 2.5rem;
+          display: flex; flex-direction: column; justify-content: space-between;
+          position: relative; overflow: hidden;
+        }
+        .login-panel-left::before {
+          content: ''; position: absolute; inset: 0;
+          background: radial-gradient(ellipse 100% 80% at 100% 100%, rgba(255,103,31,0.15) 0%, transparent 60%);
+        }
+        .left-top { position: relative; z-index: 1; }
+        .left-badge {
+          display: inline-flex; align-items: center; gap: 0.5rem;
+          background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+          border-radius: 999px; padding: 0.35rem 0.9rem;
+          font-family: 'Sora', sans-serif; font-size: 0.7rem; font-weight: 700;
+          color: rgba(255,255,255,0.7); letter-spacing: 0.08em; text-transform: uppercase;
+          margin-bottom: 1.5rem;
+        }
+        .left-badge::before { content:''; width:7px; height:7px; border-radius:50%; background:#22c55e; animation: lp 2s ease-in-out infinite; }
+        @keyframes lp { 0%,100%{opacity:1} 50%{opacity:.3} }
+        .left-title {
+          font-family: 'Sora', sans-serif; font-size: 2rem; font-weight: 800;
+          color: #fff; line-height: 1.15; letter-spacing: -0.03em; margin-bottom: 1rem;
+        }
+        .left-title span { color: #FF671F; }
+        .left-desc { font-size: 0.875rem; color: rgba(255,255,255,0.5); line-height: 1.7; }
+
+        .left-features { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 0.75rem; margin-top: 2rem; }
+        .feat-item {
+          display: flex; align-items: center; gap: 0.875rem;
+          padding: 0.75rem 1rem;
+          background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 10px;
+        }
+        .feat-ico { font-size: 1.1rem; flex-shrink: 0; }
+        .feat-text { font-size: 0.8rem; color: rgba(255,255,255,0.65); line-height: 1.4; }
+        .feat-text strong { color: rgba(255,255,255,0.9); display: block; font-size: 0.82rem; }
+
+        .left-bottom { position: relative; z-index: 1; }
+        .left-stripe {
+          height: 3px; border-radius: 2px;
+          background: linear-gradient(90deg, #FF671F 0% 33.3%, rgba(255,255,255,0.3) 33.3% 66.6%, #046A38 66.6% 100%);
+          margin-top: 2rem;
+        }
+
+        .login-panel-right {
+          background: var(--card);
+          padding: 3rem 2.5rem;
+          display: flex; flex-direction: column; justify-content: center;
+        }
+
+        .form-kicker {
+          font-family: 'Sora', sans-serif; font-size: 0.67rem; font-weight: 700;
+          letter-spacing: 0.13em; text-transform: uppercase; color: var(--fire);
+          margin-bottom: 0.4rem;
+        }
+        .form-title {
+          font-family: 'Sora', sans-serif; font-size: 1.55rem; font-weight: 800;
+          color: var(--ink); letter-spacing: -0.025em; margin-bottom: 0.35rem;
+        }
+        .form-sub { font-size: 0.855rem; color: var(--muted); margin-bottom: 2rem; line-height: 1.5; }
+
+        .alert {
+          display: flex; flex-direction: column; align-items: stretch;
+          border-radius: 10px; padding: 0.875rem 1rem;
+          font-size: 0.855rem; margin-bottom: 1.25rem; line-height: 1.5;
+        }
+        .alert-error   { background: #fef2f2; border: 1px solid rgba(220,38,38,0.2); color: #dc2626; font-weight: 600; }
+        [data-theme="dark"] .alert-error   { background: rgba(220,38,38,0.1); }
+
+        /* Success toast — replaces the old inline .alert-success banner.
+           Slides in from the top, sits for a few seconds, then fades out
+           on its own, leaving the plain login page behind. */
+        .toast-success {
+          position: fixed; top: 1.25rem; left: 50%;
+          transform: translateX(-50%) translateY(-16px);
+          z-index: 100;
+          display: flex; align-items: center; gap: 0.7rem;
+          background: #f0fdf4; border: 1px solid rgba(22,163,74,0.3);
+          color: #16a34a; border-radius: 12px;
+          padding: 0.85rem 1.25rem;
+          font-size: 0.85rem; font-weight: 600; line-height: 1.5;
+          box-shadow: 0 12px 32px rgba(22,163,74,0.18), 0 4px 12px rgba(6,14,31,0.08);
+          max-width: min(90vw, 460px);
+          opacity: 0;
+          animation: toastIn 380ms cubic-bezier(0.22,1,0.36,1) forwards,
+                     toastOut 420ms cubic-bezier(0.4,0,1,1) forwards 3.6s;
+        }
+        [data-theme="dark"] .toast-success { background: rgba(22,163,74,0.12); }
+        .toast-success .toast-ico { flex-shrink: 0; font-size: 1.05rem; }
+        @keyframes toastIn {
+          from { opacity: 0; transform: translateX(-50%) translateY(-16px); }
+          to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+        @keyframes toastOut {
+          from { opacity: 1; transform: translateX(-50%) translateY(0); }
+          to   { opacity: 0; transform: translateX(-50%) translateY(-16px); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .toast-success { animation: none; opacity: 1; }
+        }
+
+        .field { margin-bottom: 1.25rem; }
+        .field-label {
+          display: flex; align-items: center; gap: 0.4rem;
+          font-family: 'Sora', sans-serif; font-size: 0.72rem; font-weight: 700;
+          letter-spacing: 0.06em; text-transform: uppercase;
+          color: var(--ink-2); margin-bottom: 0.5rem;
+        }
+        .field-wrap { position: relative; }
+        .field-icon {
+          position: absolute; left: 0.875rem; top: 50%; transform: translateY(-50%);
+          font-size: 1rem; pointer-events: none; z-index: 1;
+        }
+
+        .aadhaar-wrap { position: relative; }
+
+        .aadhaar-overlay {
+          width: 100%;
+          padding: 0.8rem 1rem 0.8rem 2.75rem;
+          border: 1.5px solid var(--border);
+          border-radius: 10px;
+          background: var(--surface);
+          color: var(--ink);
+          font-family: 'DM Mono', monospace;
+          font-size: 0.95rem;
+          letter-spacing: 0.18em;
+          cursor: text;
+          min-height: 44px;
+          display: flex; align-items: center;
+          transition: border-color 200ms, box-shadow 200ms;
+          user-select: none;
+        }
+        .aadhaar-overlay.focused {
+          border-color: var(--navy-3);
+          box-shadow: 0 0 0 3px rgba(26,48,102,0.12);
+          background: var(--card);
+        }
+        .aadhaar-overlay.valid { border-color: #16a34a; }
+        .aadhaar-overlay .placeholder-text { color: var(--faint); font-family: 'DM Sans', sans-serif; font-size: 0.88rem; letter-spacing: 0; }
+
+        .aadhaar-real {
+          position: absolute; inset: 0;
+          opacity: 0;
+          width: 100%; height: 100%;
+          cursor: text;
+          font-size: 1rem;
+          border: none; background: transparent;
+        }
+
+        .field-input {
+          width: 100%; padding: 0.8rem 1rem 0.8rem 2.75rem;
+          border: 1.5px solid var(--border); border-radius: 10px;
+          background: var(--surface); color: var(--ink);
+          font-family: 'DM Mono', monospace; font-size: 0.9rem;
+          transition: border-color 200ms, box-shadow 200ms, background 200ms;
+          outline: none;
+        }
+        .field-input:focus {
+          border-color: var(--navy-3);
+          box-shadow: 0 0 0 3px rgba(26,48,102,0.12);
+          background: var(--card);
+        }
+        .field-input::placeholder { color: var(--faint); font-family: 'DM Sans', sans-serif; }
+        .field-hint { font-size: 0.72rem; color: var(--faint); margin-top: 0.35rem; }
+
+        /* Action row: Home + Send OTP share one line and the same
+           button shape/height/typography so they read as a pair. */
+        .action-row {
+          display: flex; align-items: stretch; gap: 0.75rem;
+          margin-top: 0.5rem;
+        }
+        .btn-home {
+          flex: 0 0 auto;
+          padding: 0.95rem 1.25rem;
+          background: var(--card);
+          color: var(--ink-2);
+          border: 1.5px solid var(--border-2);
+          border-radius: 10px;
+          font-family: 'Sora', sans-serif; font-size: 0.9rem; font-weight: 700;
+          letter-spacing: 0.02em; text-decoration: none;
+          display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+          transition: transform 150ms, border-color 200ms, color 200ms, background 200ms;
+          white-space: nowrap;
+        }
+        .btn-home:hover {
+          border-color: var(--navy-3); color: var(--navy-3);
+          background: var(--surface); transform: translateY(-2px);
+        }
+        .btn-home:active { transform: scale(0.98); }
+
+        .btn-submit {
+          flex: 1 1 auto;
+          padding: 0.95rem 1.5rem;
+          background: linear-gradient(135deg, var(--fire) 0%, var(--fire-2) 100%);
+          color: #fff; border: none; border-radius: 10px;
+          font-family: 'Sora', sans-serif; font-size: 0.9rem; font-weight: 700;
+          letter-spacing: 0.02em; cursor: pointer;
+          box-shadow: 0 6px 24px var(--fire-glow);
+          transition: transform 150ms, box-shadow 200ms;
+          display: flex; align-items: center; justify-content: center; gap: 0.6rem;
+          position: relative; overflow: hidden; margin: 0;
+        }
+        .btn-submit::after {
+          content: ''; position: absolute; inset: 0;
+          background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.2) 50%, transparent 60%);
+          transform: translateX(-120%); transition: transform 0.55s ease;
+        }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 10px 32px var(--fire-glow); }
+        .btn-submit:hover::after { transform: translateX(120%); }
+        .btn-submit:active { transform: scale(0.98); }
+
+        .divider {
+          display: flex; align-items: center; gap: 0.875rem;
+          color: var(--faint); font-size: 0.75rem; margin: 1.25rem 0;
+        }
+        .divider::before, .divider::after { content:''; flex:1; height:1px; background:var(--border); }
+
+        .reg-link { text-align: center; font-size: 0.845rem; color: var(--muted); }
+        .reg-link a {
+          color: var(--navy-3); font-weight: 600; text-decoration: none;
+          font-family: 'Sora', sans-serif; font-size: 0.82rem;
+        }
+        .reg-link a:hover { text-decoration: underline; }
+
+        /* NEW: dev-only admin link */
+        .dev-admin-link {
+          text-align: center; margin-top: 0.75rem;
+        }
+        .dev-admin-link a {
+          font-size: 0.72rem; color: var(--faint); text-decoration: none;
+          border: 1px dashed var(--border-2); padding: 0.3rem 0.7rem;
+          border-radius: 6px; font-family: 'Sora', sans-serif;
+          transition: color 150ms, border-color 150ms;
+        }
+        .dev-admin-link a:hover { color: var(--navy-3); border-color: var(--navy-3); }
+
+        @media (max-width: 700px) {
+          .login-wrap { grid-template-columns: 1fr; }
+          .login-panel-left { display: none; }
+          .login-panel-right { padding: 2.5rem 1.5rem; border-radius: 24px; }
+        }
+        @media (max-width: 420px) {
+          .action-row { flex-direction: column; }
+          .btn-home { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="bg-mesh" aria-hidden="true"></div>
+<div class="bg-grid" aria-hidden="true"></div>
+
+<!-- Success toast — only rendered when ${success} is present, auto-hides
+     itself via the CSS animation (toastIn then toastOut ~4s later). No JS
+     needed to remove it since animation-fill-mode:forwards keeps it at
+     opacity:0 after toastOut finishes; it just stops being visible. -->
+<div th:if="${success}" class="toast-success" role="status">
+    <span class="toast-ico">✅</span>
+    <span th:text="${success}"></span>
+</div>
+
+<header class="ec-header">
+    <div class="ec-left">
+        <div class="ec-emblem">⚖️</div>
+        <div class="ec-brand">
+            <span class="ec-brand-main">தேர்தல் ஆணையம் · Election Commission of Tamil Nadu</span>
+            <span class="ec-brand-sub">Tamil Nadu Legislative Assembly Election — 2026</span>
+        </div>
+    </div>
+    <div class="flag-pill"><span class="fp-s"></span><span class="fp-w"></span><span class="fp-g"></span></div>
+</header>
+
+<div class="page-body">
+    <div class="login-wrap">
+
+        <div class="login-panel-left">
+            <div class="left-top">
+                <div class="left-badge">Secure E-Voting Portal</div>
+                <h1 class="left-title">Your Vote.<br><span>Your Voice.</span><br>Counts.</h1>
+                <p class="left-desc">Cast your vote securely from anywhere. Verified by OTP, recorded on blockchain.</p>
+
+                <div class="left-features">
+                    <div class="feat-item">
+                        <span class="feat-ico">🔒</span>
+                        <div class="feat-text"><strong>End-to-End Secure</strong>OTP verified identity, encrypted vote</div>
+                    </div>
+                    <div class="feat-item">
+                        <span class="feat-ico">⛓️</span>
+                        <div class="feat-text"><strong>Blockchain Recorded</strong>Tamper-proof, permanent record</div>
+                    </div>
+                    <div class="feat-item">
+                        <span class="feat-ico">✅</span>
+                        <div class="feat-text"><strong>Instant Confirmation</strong>Know your vote was counted</div>
+                    </div>
+                </div>
+            </div>
+            <div class="left-bottom">
+                <div class="left-stripe"></div>
+            </div>
+        </div>
+
+        <div class="login-panel-right">
+            <div class="form-kicker">🗳️ Voter Login</div>
+            <h2 class="form-title">Sign in to Vote</h2>
+
+            <p class="form-sub">Enter your Aadhaar number and registered mobile to receive an OTP.</p>
+
+            <!-- Error alert stays inline — errors need to stick around
+                 until the user acts on them, unlike a success confirmation. -->
+            <div th:if="${error}" class="alert alert-error">
+                <div style="display:flex;gap:0.75rem;align-items:flex-start;">
+                    <span>🛑</span><span th:text="${error}"></span>
+                </div>
+
+                <!-- Expanded bilingual "already voted" details -->
+                <div th:if="${alreadyVoted}" style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid rgba(220,38,38,0.15);">
+                    <div style="font-size:0.8rem;color:#7f1d1d;line-height:1.7;">
+                        <div><strong>🗳️ You have already voted / நீங்கள் ஏற்கனவே வாக்களித்துவிட்டீர்கள்</strong></div>
+                        <div th:if="${votedWard}">
+                            Ward / வார்டு: <strong th:text="${votedWard}">—</strong>
+                        </div>
+                        <div th:if="${votedAt}">
+                            Voted on / வாக்களித்த நேரம்:
+                            <strong th:text="${#temporals.format(votedAt, 'dd MMM yyyy, hh:mm a')}">—</strong>
+                        </div>
+                    </div>
+                    <form th:action="@{/voter/logout}" method="post" style="margin-top:0.6rem;">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <button type="submit" style="padding:0.5rem 1rem;border-radius:8px;border:1px solid rgba(220,38,38,0.3);background:#fff;color:#dc2626;font-family:'Sora',sans-serif;font-size:0.75rem;font-weight:700;cursor:pointer;">
+                            ↩ Logout / வெளியேறு
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <form th:action="@{/voter/login}" method="post" id="loginForm" novalidate>
+
+                <div class="field">
+                    <label class="field-label" for="aadhaarReal">🪪 &nbsp;Aadhaar Number</label>
+                    <div class="field-wrap aadhaar-wrap">
+                        <span class="field-icon">🔑</span>
+                        <div class="aadhaar-overlay" id="aadhaarOverlay" aria-hidden="true">
+                            <span class="placeholder-text" id="aadhaarPlaceholder">XXXX XXXX XXXX</span>
+                        </div>
+                        <input type="text" id="aadhaarReal" name="aadhaar"
+                               class="aadhaar-real"
+                               inputmode="numeric"
+                               maxlength="12"
+                               autocomplete="off"
+                               required
+                               aria-label="Aadhaar Number"/>
+                    </div>
+                    <div class="field-hint">Your Aadhaar number is never stored in plain text</div>
+                </div>
+
+                <div class="field">
+                    <label class="field-label" for="mobile">📱 &nbsp;Registered Mobile</label>
+                    <div class="field-wrap">
+                        <span class="field-icon">📞</span>
+                        <input type="tel" id="mobile" name="mobile" class="field-input"
+                               placeholder="10-digit mobile number" maxlength="10"
+                               inputmode="numeric" pattern="[6-9]\d{9}" autocomplete="tel" required/>
+                    </div>
+                    <div class="field-hint">Mobile number linked to your voter registration</div>
+                </div>
+
+                <!-- Home + Send OTP now share a single row with matching
+                     button proportions; Home is the outline/secondary style,
+                     Send OTP keeps the primary fire-gradient treatment. -->
+                <div class="action-row">
+                    <a th:href="@{/}" class="btn-home">← Home</a>
+                    <button type="submit" class="btn-submit" id="submitBtn">
+                        <span id="btnText">Send OTP &nbsp;→</span>
+                    </button>
+                </div>
+            </form>
+
+        </div>
+
+    </div>
+</div>
+
+<script>
+    (function () {
+
+      var realInput  = document.getElementById('aadhaarReal');
+      var overlay    = document.getElementById('aadhaarOverlay');
+      var placeholder = document.getElementById('aadhaarPlaceholder');
+
+      function formatAadhaar(raw) {
+        var digits = raw.replace(/\D/g, '').slice(0, 12);
+        var parts   = [];
+        for (var i = 0; i < 3; i++) {
+          var chunk = digits.slice(i * 4, i * 4 + 4);
+          if (chunk.length === 0) {
+            parts.push('XXXX');
+          } else if (chunk.length < 4) {
+            parts.push(chunk + 'XXXX'.slice(chunk.length));
+          } else {
+            parts.push(chunk);
+          }
+        }
+        return parts.join(' ');
+      }
+
+      function updateOverlay() {
+        var raw = realInput.value.replace(/\D/g, '').slice(0, 12);
+        realInput.value = raw;
+
+        if (raw.length === 0) {
+          overlay.innerHTML = '<span class="placeholder-text" id="aadhaarPlaceholder">XXXX XXXX XXXX</span>';
+          overlay.classList.remove('valid');
+        } else {
+          var formatted = formatAadhaar(raw);
+          overlay.textContent = formatted;
+          overlay.style.color = raw.length === 12 ? '#16a34a' : 'var(--ink)';
+          if (raw.length === 12) {
+            overlay.classList.add('valid');
+          } else {
+            overlay.classList.remove('valid');
+          }
+        }
+      }
+
+      realInput.addEventListener('input', updateOverlay);
+
+      realInput.addEventListener('focus', function () {
+        overlay.classList.add('focused');
+      });
+      realInput.addEventListener('blur', function () {
+        overlay.classList.remove('focused');
+      });
+
+      overlay.addEventListener('click', function () {
+        realInput.focus();
+      });
+
+      document.getElementById('mobile').addEventListener('input', function () {
+        this.value = this.value.replace(/\D/g, '').slice(0, 10);
+      });
+
+      document.getElementById('loginForm').addEventListener('submit', function (e) {
+        var raw = realInput.value.replace(/\D/g, '');
+        if (raw.length !== 12) {
+          e.preventDefault();
+          overlay.classList.add('focused');
+          overlay.style.borderColor = '#dc2626';
+          realInput.focus();
+          return;
+        }
+        realInput.value = raw;
+        var btn = document.getElementById('submitBtn');
+        var txt = document.getElementById('btnText');
+        btn.disabled = true;
+        txt.textContent = 'Sending OTP…';
+      });
+
+    })();
+</script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Verify Ballot Card — Tamil Nadu E-Voting</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <style>
+        body { font-family:'DM Sans',sans-serif; background:linear-gradient(135deg,#f5f7fa,#e9ecf1); min-height:100vh; }
+        .container { max-width:500px; margin:0 auto; padding:2rem 1rem; }
+        .verify-card { background:#fff; border-radius:20px; padding:2.5rem; box-shadow:0 8px 24px rgba(12,26,62,0.12); }
+        .verify-icon { font-size:3rem; text-align:center; margin-bottom:1.5rem; display:block; }
+        .verify-title { font-size:1.6rem; font-weight:800; color:#060E1F; text-align:center; margin-bottom:0.5rem; font-family:'Sora',sans-serif; }
+        .verify-sub { font-size:0.9rem; color:#6b7280; text-align:center; line-height:1.6; margin-bottom:1.75rem; }
+        .info-box { background:linear-gradient(135deg,rgba(26,48,102,0.05),rgba(4,106,56,0.05)); border-radius:12px; padding:1.25rem; margin-bottom:1.25rem; border:1px solid rgba(200,150,12,0.1); }
+        .info-label { font-size:0.7rem; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; color:#9ca3af; margin-bottom:0.3rem; font-family:'Sora',sans-serif; }
+        .info-value { font-size:1rem; font-weight:600; color:#1A3066; word-break:break-word; }
+        .alert { padding:0.9rem 1.1rem; border-radius:10px; font-size:0.875rem; margin-bottom:1.25rem; line-height:1.5; }
+        .alert-error   { background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; }
+        .alert-success { background:#d1fae5; color:#065f46; border:1px solid #6ee7b7; }
+        .form-group { display:flex; flex-direction:column; gap:0.4rem; margin-bottom:1.5rem; }
+        .form-label { font-family:'Sora',sans-serif; font-size:0.75rem; font-weight:700; color:#374151; letter-spacing:0.07em; text-transform:uppercase; }
+        .otp-input { padding:0.9rem; border:1.5px solid #e5e7eb; border-radius:10px; font-size:1rem; font-family:'DM Mono',monospace; background:#fafafa; width:100%; color:#111827; transition:all 200ms; }
+        .otp-input:focus { border-color:#1A3066; background:#fff; box-shadow:0 0 0 4px rgba(26,48,102,0.1); outline:none; }
+        .form-hint { font-size:0.775rem; color:#9ca3af; margin-top:0.5rem; text-align:center; }
+        .btn-row { display:flex; gap:1rem; margin-top:2rem; }
+        .btn-submit { flex:1; padding:0.9rem; border-radius:10px; border:none; background:linear-gradient(135deg,#1A3066,#0D1F3C); color:#fff; font-size:0.9rem; font-weight:700; cursor:pointer; transition:all 150ms; }
+        .btn-submit:hover { transform:translateY(-2px); }
+        .btn-cancel { padding:0.9rem 1.5rem; border-radius:10px; background:#e5e7eb; color:#374151; text-decoration:none; font-weight:700; display:flex; align-items:center; font-size:0.9rem; }
+        .back-link { display:inline-flex; align-items:center; gap:0.5rem; color:#1A3066; font-weight:600; text-decoration:none; font-size:0.9rem; margin-bottom:1.5rem; }
+        .back-link::before { content:'← '; }
+    </style>
+</head>
+<body>
+<header class="ec-header">
+    <div class="ec-left">
+        <div class="ec-emblem">⚖️</div>
+        <div class="ec-brand">
+            <span class="ec-brand-main">தேர்தல் ஆணையம் · Election Commission</span>
+            <span class="ec-brand-sub">Ballot Card Verification</span>
+        </div>
+    </div>
+    <div class="ec-right">
+        <div class="flag-pill"><span class="fp-s"></span><span class="fp-w"></span><span class="fp-g"></span></div>
+        <span class="ec-chip">🔒 Secure</span>
+    </div>
+</header>
+<div class="container">
+    <a href="/admin/dashboard" class="back-link">Dashboard</a>
+    <div class="verify-card">
+        <span class="verify-icon">✅</span>
+        <h1 class="verify-title">Confirm Ballot Card</h1>
+        <p class="verify-sub">Review the details below and enter the OTP to confirm adding this party to the ballot.</p>
+
+        <div class="info-box" th:if="${partyName}">
+            <div class="info-label">Party Being Added</div>
+            <div class="info-value" th:text="${partyName}">Party Name</div>
+        </div>
+
+        <div th:if="${error}"   class="alert alert-error">⚠️ <span th:text="${error}"></span></div>
+        <div th:if="${success}" class="alert alert-success">✓ <span th:text="${success}"></span></div>
+
+        <form action="/admin/verify-candidate" method="post" novalidate>
+            <div class="form-group">
+                <label class="form-label" for="otp">OTP (6 digits)</label>
+                <input class="otp-input" type="text" id="otp" name="otp"
+                       placeholder="000000" maxlength="6" inputmode="numeric"
+                       pattern="\d{6}" required autofocus/>
+                <div class="form-hint">Enter the 6-digit code sent to the admin email</div>
+            </div>
+            <div class="btn-row">
+                <a href="/admin/add-candidate" class="btn-cancel">Back</a>
+                <button type="submit" class="btn-submit">Verify &amp; Add to Ballot →</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    (function() {
+        var o = document.getElementById('otp');
+        if (o) o.addEventListener('input', function(e) {
+            e.target.value = e.target.value.replace(/\D/g,'').slice(0,6);
+        });
+    })();
+</script>
+</body>
+</html>

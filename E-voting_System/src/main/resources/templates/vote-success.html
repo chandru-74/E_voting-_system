@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Your vote has been successfully cast">
+    <title>Vote Successful - E-Voting System</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .success-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            padding: 1rem;
+        }
+
+        .success-card {
+            width: 100%;
+            max-width: 500px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 3rem 2rem;
+            box-shadow: var(--shadow-xl);
+            text-align: center;
+            animation: slideInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            display: block;
+            animation: bounce 0.6s ease-out;
+        }
+
+        @keyframes bounce {
+            0% {
+                opacity: 0;
+                transform: scale(0.3) translateY(10px);
+            }
+            50% {
+                opacity: 1;
+            }
+            70% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .success-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--success);
+            margin: 0 0 1rem 0;
+        }
+
+        .success-message {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .confirmation-details {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .detail-value {
+            color: var(--primary-light);
+            font-weight: 600;
+        }
+
+        .next-steps {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+
+        .next-steps-title {
+            color: var(--success);
+            font-weight: 600;
+            margin: 0 0 1rem 0;
+            font-size: 0.95rem;
+        }
+
+        .next-steps-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .next-steps-item {
+            color: #86efac;
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            font-size: 0.9rem;
+        }
+
+        .next-steps-item::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            font-weight: 700;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            flex: 1;
+            padding: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: var(--shadow);
+            min-width: 150px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-secondary {
+            flex: 1;
+            padding: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            min-width: 150px;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary-light);
+            color: var(--primary-light);
+        }
+
+        .timestamp {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .success-card {
+                padding: 2rem 1.5rem;
+            }
+
+            .success-title {
+                font-size: 1.5rem;
+            }
+
+            .success-icon {
+                font-size: 3rem;
+                margin-bottom: 1rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn-primary,
+            .btn-secondary {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="success-container">
+    <div class="success-card">
+        <span class="success-icon" aria-hidden="true">✅</span>
+        <h1 class="success-title">Vote Cast Successfully!</h1>
+        <p class="success-message">
+            Your vote has been securely recorded and stored on the blockchain. Thank you for participating in this election.
+        </p>
+
+        <div class="confirmation-details">
+            <div class="detail-row">
+                <span class="detail-label">Status</span>
+                <span class="detail-value">Confirmed</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Transaction ID</span>
+                <span class="detail-value" id="txHash">Loading...</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Timestamp</span>
+                <span class="detail-value" id="timestamp">--:--:--</span>
+            </div>
+        </div>
+
+        <div class="next-steps">
+            <p class="next-steps-title">What happens next?</p>
+            <ul class="next-steps-list">
+                <li class="next-steps-item">Your vote is encrypted and stored</li>
+                <li class="next-steps-item">Results will be displayed after voting ends</li>
+                <li class="next-steps-item">Blockchain verification is complete</li>
+            </ul>
+        </div>
+
+        <div class="action-buttons">
+            <a href="/voter/live" class="btn-primary">
+                <span>📊</span> View Live Results
+            </a>
+            <a href="/voter" class="btn-secondary">
+                <span>🔙</span> Back to Home
+            </a>
+        </div>
+
+        <div class="timestamp" id="currentTime"></div>
+    </div>
+</div>
+
+<script>
+    // Generate transaction hash
+    function generateTxHash() {
+        const chars = '0123456789abcdef';
+        let hash = '0x';
+        for (let i = 0; i < 40; i++) {
+            hash += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return hash;
+    }
+
+    // Set transaction hash and timestamp
+    document.addEventListener('DOMContentLoaded', function() {
+        const txHashEl = document.getElementById('txHash');
+        const timestampEl = document.getElementById('timestamp');
+        const currentTimeEl = document.getElementById('currentTime');
+
+        const now = new Date();
+
+        // Set transaction hash
+        txHashEl.textContent = generateTxHash().substring(0, 16) + '...';
+
+        // Set timestamp
+        timestampEl.textContent = now.toLocaleTimeString('en-IN', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+
+        // Set current time
+        currentTimeEl.textContent = `✓ Voted at ${now.toLocaleString('en-IN')}`;
+
+        // Add confetti animation
+        createConfetti();
+    });
+
+    function createConfetti() {
+        const container = document.querySelector('.success-container');
+        const colors = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+
+        for (let i = 0; i < 30; i++) {
+            const confetti = document.createElement('div');
+            confetti.style.position = 'fixed';
+            confetti.style.width = '10px';
+            confetti.style.height = '10px';
+            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            confetti.style.left = Math.random() * 100 + '%';
+            confetti.style.top = '-10px';
+            confetti.style.borderRadius = '50%';
+            confetti.style.pointerEvents = 'none';
+            confetti.style.zIndex = '-1';
+
+            container.appendChild(confetti);
+
+            const duration = 2 + Math.random() * 1;
+            const xMovement = (Math.random() - 0.5) * 200;
+
+            confetti.animate([
+                {
+                    transform: 'translateY(0) translateX(0) rotate(0deg)',
+                    opacity: 1
+                },
+                {
+                    transform: `translateY(${window.innerHeight}px) translateX(${xMovement}px) rotate(360deg)`,
+                    opacity: 0
+                }
+            ], {
+                duration: duration * 1000,
+                easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+            });
+
+            setTimeout(() => confetti.remove(), duration * 1000);
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Cast your vote for your preferred candidate">
+    <title>Vote - E-Voting System</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #60a5fa, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+        }
+
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-top: 0.5rem;
+        }
+
+        .candidates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .candidate-card {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow);
+        }
+
+        .candidate-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--primary-light);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .candidate-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            padding: 2rem 1.5rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .candidate-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .candidate-avatar {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            display: block;
+            position: relative;
+            z-index: 1;
+        }
+
+        .candidate-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            margin: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .candidate-body {
+            padding: 1.5rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .party-badge {
+            display: inline-block;
+            background: var(--bg-tertiary);
+            color: var(--primary-light);
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            border: 1px solid var(--primary);
+            width: fit-content;
+        }
+
+        .vote-stats {
+            background: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border: 1px solid var(--border);
+        }
+
+        .vote-stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .vote-stat-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .vote-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .vote-count {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .vote-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 700;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            box-shadow: var(--shadow);
+            min-width: 2.5rem;
+        }
+
+        .vote-percentage {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .progress-container {
+            margin: 1rem 0;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+            border-radius: 4px;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            min-width: 2px;
+        }
+
+        .vote-form {
+            margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .vote-btn {
+            width: 100%;
+            padding: 0.85rem;
+            font-size: 1rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--success), #059669);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow);
+        }
+
+        .vote-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            background: linear-gradient(135deg, #059669, #047857);
+        }
+
+        .vote-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .vote-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .vote-btn.confirmed {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+        }
+
+        .info-box {
+            background: rgba(14, 165, 233, 0.1);
+            border: 1px solid var(--info);
+            color: #7dd3fc;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .info-icon {
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .info-content {
+            flex-grow: 1;
+        }
+
+        .info-content p {
+            color: #7dd3fc;
+            margin: 0;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .candidate-card {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .candidate-card:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .candidate-card:nth-child(3) {
+            animation-delay: 0.2s;
+        }
+
+        .candidate-card:nth-child(4) {
+            animation-delay: 0.3s;
+        }
+
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 1.75rem;
+            }
+
+            .candidates-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .candidate-header {
+                padding: 1.5rem 1rem;
+            }
+
+            .candidate-avatar {
+                font-size: 2.5rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .candidate-name {
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="page-header">
+        <h1 class="page-title">🗳️ Vote for Your Candidate</h1>
+        <p class="page-subtitle">Select your preferred candidate and cast your vote securely</p>
+    </div>
+
+    <div class="info-box">
+        <span class="info-icon">ℹ️</span>
+        <div class="info-content">
+            <p><strong>Important:</strong> You can only vote once. Please review all candidates carefully before casting your vote.</p>
+        </div>
+    </div>
+
+    <div class="candidates-grid">
+        <div th:each="c : ${results}" class="candidate-card">
+            <!-- Header with name -->
+            <div class="candidate-header">
+                <span class="candidate-avatar" aria-hidden="true">👤</span>
+                <h2 class="candidate-name" th:text="${c.name}">Candidate Name</h2>
+            </div>
+
+            <!-- Body with info -->
+            <div class="candidate-body">
+                <!-- Party Badge -->
+                <span class="party-badge" th:text="${c.party}">Party Name</span>
+
+                <!-- Vote Statistics -->
+                <div class="vote-stats">
+                    <div class="vote-stat-row">
+                        <span class="vote-label">Votes Received</span>
+                        <div class="vote-count">
+                            <span class="vote-badge" th:text="${c.votes}">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="progress-container">
+                    <div class="progress-label">
+                        <span>Voting Progress</span>
+                        <span class="vote-percentage" id="percentage_" th:id="'percentage_' + ${c.id}" th:text="${c.votes} + ' votes'">0 votes</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill_" th:id="'progressFill_' + ${c.id}" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Vote Button -->
+                <form class="vote-form" th:action="@{/voter/cast}" method="post" th:id="'form_' + ${c.id}">
+                    <input type="hidden" name="candidateId" th:value="${c.id}">
+                    <button
+                            type="submit"
+                            class="vote-btn"
+                            th:attr="data-candidate-name=${c.name}"
+                            onclick="return confirmVote(this, event)">
+                        Vote for <span th:text="${c.name}">Candidate</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <nav class="nav-links" style="margin-top: 3rem; justify-content: center;">
+        <a href="/voter/live" class="nav-link">
+            <span>📊</span> Live Results
+        </a>
+    </nav>
+</div>
+
+<script>
+    let maxVotes = 1;
+
+    // Calculate max votes for percentage
+    document.addEventListener('DOMContentLoaded', function() {
+        const voteBadges = document.querySelectorAll('.vote-badge');
+        voteBadges.forEach(badge => {
+            const votes = parseInt(badge.textContent);
+            if (votes > maxVotes) {
+                maxVotes = votes;
+            }
+        });
+
+        // Update progress bars
+        updateProgressBars();
+    });
+
+    function updateProgressBars() {
+        const voteBadges = document.querySelectorAll('.vote-badge');
+        voteBadges.forEach(badge => {
+            const votes = parseInt(badge.textContent);
+            const form = badge.closest('.candidate-card').querySelector('form');
+            const candidateId = form.querySelector('input[name="candidateId"]').value;
+
+            const progressFill = document.getElementById('progressFill_' + candidateId);
+            if (progressFill && maxVotes > 0) {
+                const percentage = (votes / maxVotes) * 100;
+                progressFill.style.width = Math.max(2, percentage) + '%';
+            }
+        });
+    }
+
+    function confirmVote(button, event) {
+        event.preventDefault();
+        const candidateName = button.getAttribute('data-candidate-name');
+
+        const confirmed = confirm(
+            `Are you sure you want to vote for ${candidateName}?\n\n` +
+            `⚠️ WARNING: You can only vote once. This action cannot be undone.`
+        );
+
+        if (confirmed) {
+            button.disabled = true;
+            button.textContent = 'Casting vote...';
+            button.closest('form').submit();
+        }
+
+        return false;
+    }
+
+    // EventSource for real-time vote updates
+    const eventSource = new EventSource('/api/stream/events');
+
+    eventSource.onmessage = function(event) {
+        try {
+            const data = JSON.parse(event.data);
+
+            // Update vote counts
+            for (let candidateId in data) {
+                const votes = data[candidateId];
+                const badge = document.querySelector(`.vote-badge[data-candidate-id="${candidateId}"]`) ||
+                            Array.from(document.querySelectorAll('.vote-badge'))
+                                .find(b => b.textContent.trim() === votes.toString());
+
+                if (badge) {
+                    const oldVotes = parseInt(badge.textContent);
+                    if (oldVotes !== votes) {
+                        badge.textContent = votes;
+                        // Animate update
+                        badge.style.animation = 'none';
+                        setTimeout(() => {
+                            badge.style.animation = 'pulse 0.6s ease-out';
+                        }, 10);
+                    }
+                }
+            }
+
+            // Recalculate max and update progress
+            maxVotes = 1;
+            document.querySelectorAll('.vote-badge').forEach(badge => {
+                const votes = parseInt(badge.textContent);
+                if (votes > maxVotes) {
+                    maxVotes = votes;
+                }
+            });
+            updateProgressBars();
+
+        } catch (error) {
+            console.error('Error parsing vote update:', error);
+        }
+    };
+
+    eventSource.onerror = function() {
+        console.log('EventSource connection closed');
+    };
+
+    // Cleanup
+    window.addEventListener('beforeunload', function() {
+        eventSource.close();
+    });
+
+    // Add pulse animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+    `;
+    document.head.appendChild(style);
+</script>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Pending Ballot Cards — Tamil Nadu E-Voting</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500&display=swap');
+        body { font-family:'DM Sans',sans-serif; background:var(--bg-body,#f9f7f0); min-height:100vh; }
+        .container { max-width:860px; margin:0 auto; padding:2rem 1rem; }
+
+        .top-row {
+            display:flex; justify-content:space-between; align-items:center;
+            margin-bottom:1.5rem;
+        }
+        .btn-back {
+            display:inline-flex; align-items:center; gap:.4rem;
+            padding:.55rem 1.1rem; border-radius:8px;
+            background:#f1f5f9; color:var(--ink,#1e293b); border:1px solid var(--border,#e2e8f0);
+            font-family:'Sora',sans-serif; font-size:.82rem; font-weight:700;
+            text-decoration:none; transition:background 150ms;
+        }
+        .btn-back:hover { background:#e2e8f0; }
+
+        .page-card {
+            background:var(--bg-card,#fff); border:1px solid var(--border,#e2e8f0);
+            border-radius:20px; padding:2.5rem;
+            box-shadow:var(--shadow-sm,0 1px 4px rgba(0,0,0,.06));
+        }
+        .page-title {
+            font-size:1.6rem; font-weight:800; color:var(--ink,#060E1F);
+            margin-bottom:0.4rem; font-family:'Sora',sans-serif;
+        }
+        .page-sub { font-size:0.9rem; color:var(--text-3,#6b7280); margin-bottom:2rem; }
+
+        .alert { padding:0.9rem 1.1rem; border-radius:10px; font-size:0.875rem; margin-bottom:1.5rem; }
+        .alert-success { background:#d1fae5; color:#065f46; border:1px solid #6ee7b7; }
+        .alert-error   { background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; }
+
+        .table-wrap {
+            overflow-x:auto; border-radius:12px;
+            border:1px solid var(--border,#e5e7eb); margin-bottom:1.5rem;
+        }
+        table { width:100%; border-collapse:collapse; font-size:0.875rem; }
+        th {
+            background:linear-gradient(135deg,#060E1F,#1A3066);
+            color:rgba(255,255,255,0.8); padding:0.9rem 1rem; text-align:left;
+            font-family:'Sora',sans-serif; font-size:0.67rem; font-weight:700;
+            letter-spacing:0.09em; text-transform:uppercase;
+        }
+        td { padding:0.9rem 1rem; border-bottom:1px solid #e5e7eb; vertical-align:middle; }
+        tr:last-child td { border-bottom:none; }
+        tr:hover td { background:#f9fafb; }
+
+        .symbol-cell { font-size:1.5rem; text-align:center; }
+        .ward-tag {
+            display:inline-block; background:#060E1F; color:rgba(255,255,255,0.9);
+            padding:0.18rem 0.55rem; border-radius:4px;
+            font-family:'Sora',sans-serif; font-size:0.67rem; font-weight:700;
+        }
+        .status-badge {
+            display:inline-block; padding:0.2rem 0.65rem; border-radius:999px;
+            font-family:'Sora',sans-serif; font-size:0.69rem; font-weight:700;
+            background:#fef9c3; color:#92610a; border:1px solid rgba(200,150,12,0.3);
+        }
+        .btn-approve {
+            padding:0.45rem 1rem; border-radius:8px;
+            background:linear-gradient(135deg,#048A4E,#025C30); color:#fff;
+            border:none; font-family:'Sora',sans-serif; font-size:0.78rem; font-weight:700;
+            cursor:pointer; margin-right:0.4rem; transition:all 150ms;
+        }
+        .btn-approve:hover { transform:translateY(-1px); }
+        .btn-reject {
+            padding:0.45rem 1rem; border-radius:8px;
+            background:#fee2e2; color:#991b1b; border:1px solid #fca5a5;
+            font-family:'Sora',sans-serif; font-size:0.78rem; font-weight:700;
+            cursor:pointer; transition:all 150ms;
+        }
+        .btn-reject:hover { background:#fecaca; }
+
+        .empty-state { text-align:center; padding:3rem 1rem; color:#9ca3af; }
+        .empty-icon  { font-size:2.5rem; margin-bottom:0.75rem; }
+    </style>
+</head>
+<body>
+<header class="ec-header">
+    <div class="ec-left">
+        <div class="ec-emblem">⚖️</div>
+        <div class="ec-brand">
+            <span class="ec-brand-main">தேர்தல் ஆணையம் · Election Commission</span>
+            <span class="ec-brand-sub">Pending Ballot Cards</span>
+        </div>
+    </div>
+    <div class="ec-right">
+        <div class="flag-pill"><span class="fp-s"></span><span class="fp-w"></span><span class="fp-g"></span></div>
+        <span class="ec-chip">🔒 Secure</span>
+    </div>
+</header>
+
+<div class="container">
+
+    <div class="top-row">
+        <a th:href="@{/admin/dashboard}" class="btn-back">← Dashboard</a>
+    </div>
+
+    <div class="page-card">
+        <h1 class="page-title">Pending Ballot Cards</h1>
+        <p class="page-sub">Review and approve or reject parties waiting to appear on the ballot.</p>
+
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}"   class="alert alert-error"   th:text="${error}"></div>
+
+        <div th:if="${candidates == null or candidates.empty}" class="empty-state">
+            <div class="empty-icon">✅</div>
+            <div style="font-family:'Sora',sans-serif;font-weight:700;margin-bottom:0.4rem;">
+                No pending cards
+            </div>
+            <div style="font-size:0.875rem;">All ballot card submissions have been reviewed.</div>
+        </div>
+
+        <div class="table-wrap" th:unless="${candidates == null or candidates.empty}">
+            <table>
+                <thead>
+                <tr>
+                    <th style="width:48px;text-align:center;">#</th>
+                    <th style="width:64px;text-align:center;">Symbol</th>
+                    <th>Party Name</th>
+                    <th>Ward</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="c, stat : ${candidates}">
+                    <td style="text-align:center;color:#9ca3af;font-weight:700;"
+                        th:text="${stat.count}">1</td>
+                    <td class="symbol-cell" th:text="${c.partySymbol ?: '🗳️'}">🗳️</td>
+                    <td>
+                        <div style="font-weight:700;font-family:'Sora',sans-serif;"
+                             th:text="${c.partyName}">Party</div>
+                    </td>
+                    <td><span class="ward-tag" th:text="${c.wardName}">Ward</span></td>
+                    <td><span class="status-badge" th:text="${c.status}">PENDING</span></td>
+                    <td>
+                        <form th:action="@{/admin/candidates/approve/{id}(id=${c.id})}"
+                              method="post" style="display:inline;">
+                            <input type="hidden" th:name="${_csrf.parameterName}"
+                                   th:value="${_csrf.token}"/>
+                            <button class="btn-approve" type="submit">✓ Approve</button>
+                        </form>
+                        <form th:action="@{/admin/candidates/reject/{id}(id=${c.id})}"
+                              method="post" style="display:inline;">
+                            <input type="hidden" th:name="${_csrf.parameterName}"
+                                   th:value="${_csrf.token}"/>
+                            <button class="btn-reject" type="submit">✗ Reject</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

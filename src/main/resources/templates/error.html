@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Error — Tamil Nadu E-Voting</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Sora:wght@700;800&family=DM+Sans:wght@400;500&display=swap');
+    body { font-family: 'DM Sans', sans-serif; background: #f9f7f0; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .err-card {
+        width: 100%; max-width: 460px; background: #fff;
+        border: 1px solid rgba(12,26,62,0.1); border-radius: 22px;
+        box-shadow: 0 24px 60px rgba(12,26,62,0.11); overflow: hidden;
+        text-align: center; padding: 2.5rem 2rem;
+    }
+    .err-code { font-family:'Sora',sans-serif; font-size:4rem; font-weight:900; color:#e5e7eb; line-height:1; margin-bottom:0.5rem; }
+    .err-title { font-family:'Sora',sans-serif; font-size:1.3rem; font-weight:800; color:#0c1a3e; margin-bottom:0.5rem; }
+    .err-msg { font-size:0.875rem; color:#6b7280; margin-bottom:1.5rem; line-height:1.6; }
+    .err-btn {
+        display:inline-flex; align-items:center; gap:0.4rem;
+        padding:0.75rem 1.5rem; background:linear-gradient(135deg,#1A3066,#060E1F);
+        color:#fff; border-radius:10px; font-family:'Sora',sans-serif;
+        font-size:0.85rem; font-weight:700; text-decoration:none;
+    }
+  </style>
+</head>
+<body>
+<div class="err-card">
+  <div class="err-code" th:text="${status}">500</div>
+  <div class="err-title">Something went wrong</div>
+  <div class="err-msg" th:text="${message ?: 'An unexpected error occurred. Please try again.'}">Error details</div>
+  <a th:href="@{/home}" class="err-btn">← Back to Home</a>
+</div>
+</body>
+</html>

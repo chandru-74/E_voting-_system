@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Final Results — Tamil Nadu E-Voting</title>
+    <script>
+        (function() {
+          var t = localStorage.getItem('tn-vote-theme');
+          var b = localStorage.getItem('tn-vote-bg');
+          if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+          if (b && b !== 'default') document.documentElement.setAttribute('data-bg', b);
+        })();
+    </script>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800;900&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500;600&display=swap');
+
+        body { font-family: 'DM Sans', sans-serif; }
+
+        .fr-scene {
+          position: fixed; inset: 0; pointer-events: none; z-index: 0;
+          background:
+            radial-gradient(ellipse 55% 40% at 10% 10%, rgba(4,138,78,0.07) 0%, transparent 65%),
+            radial-gradient(ellipse 50% 40% at 90% 90%, rgba(200,150,12,0.06) 0%, transparent 65%);
+        }
+
+        .fr-wrap {
+          position: relative; z-index: 1; width: 100%;
+          display: flex; justify-content: center;
+          padding: 2.5rem 1rem 4rem;
+        }
+
+        .fr-container { width: 100%; max-width: 960px; }
+
+        .fr-card {
+          background: var(--bg-card, #fff);
+          border: 1px solid var(--border); border-radius: 20px;
+          box-shadow: 0 24px 60px rgba(12,26,62,0.11), 0 6px 18px rgba(12,26,62,0.06);
+          overflow: hidden;
+          animation: cardIn 480ms cubic-bezier(0.22,1,0.36,1) both;
+        }
+        @keyframes cardIn {
+          from { opacity:0; transform:translateY(20px); }
+          to   { opacity:1; transform:translateY(0); }
+        }
+
+        .fr-stripe {
+          height: 4px;
+          background: linear-gradient(90deg, #FF671F 0% 33.3%, #fff 33.3% 66.6%, #046A38 66.6% 100%);
+        }
+
+        .fr-body { padding: 2.5rem 2.25rem 2.25rem; }
+
+        .fr-kicker {
+          display: inline-flex; align-items: center; gap: 0.45rem;
+          background: var(--navy-100); color: var(--navy-700);
+          padding: 0.28rem 0.72rem; border-radius: 999px;
+          font-family: 'Sora', sans-serif; font-size: 0.68rem; font-weight: 700;
+          letter-spacing: 0.09em; text-transform: uppercase; margin-bottom: 0.85rem;
+        }
+        .fr-title {
+          font-family: 'Sora', sans-serif; font-size: 1.65rem; font-weight: 800;
+          color: var(--ink); letter-spacing: -0.025em; margin-bottom: 0.4rem;
+        }
+        .fr-sub { font-size: 0.875rem; color: var(--text-3); margin-bottom: 1.5rem; }
+
+        .fr-alert-success {
+          display: flex; gap: 0.75rem; align-items: flex-start;
+          background: var(--leaf-50); color: var(--leaf-700);
+          border: 1px solid rgba(4,138,78,0.22);
+          border-radius: 10px; padding: 0.875rem 1.1rem;
+          font-size: 0.875rem; line-height: 1.55; margin-bottom: 1.5rem;
+        }
+        .fr-alert-success strong { display:block; font-family:'Sora',sans-serif; font-size:0.85rem; font-weight:700; margin-bottom:0.2rem; }
+
+        .fr-alert-info {
+          display: flex; gap: 0.75rem; align-items: flex-start;
+          background: var(--sky-100); color: var(--sky-600);
+          border: 1px solid rgba(14,165,233,0.22);
+          border-radius: 10px; padding: 0.875rem 1.1rem;
+          font-size: 0.875rem; margin-bottom: 1.5rem;
+        }
+        .fr-alert-info strong { display:block; font-family:'Sora',sans-serif; font-size:0.85rem; font-weight:700; margin-bottom:0.2rem; }
+
+        .fr-winner {
+          background: linear-gradient(135deg, #025C30 0%, #048A4E 55%, #24C078 100%);
+          border-radius: 16px; padding: 2.25rem 2rem; text-align: center;
+          margin-bottom: 2rem; color: #fff;
+          box-shadow: 0 8px 32px rgba(4,138,78,0.4);
+          position: relative; overflow: hidden;
+          animation: cardIn 400ms ease both;
+        }
+        .fr-winner::before {
+          content: '🏆'; position: absolute; font-size: 10rem; opacity: 0.055;
+          top: -2rem; right: -2rem; pointer-events: none;
+        }
+        .fr-winner::after {
+          content: ''; position: absolute; inset: 0;
+          background-image:
+            radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px),
+            radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px);
+          background-size: 24px 24px, 36px 36px;
+          background-position: 0 0, 12px 12px;
+          pointer-events: none;
+        }
+        .fr-win-eye   { font-family:'Sora',sans-serif; font-size:0.68rem; letter-spacing:0.14em; text-transform:uppercase; opacity:0.72; margin-bottom:0.6rem; position:relative; z-index:2; }
+
+        /* ── Victory dance on the party symbol ───────────────── */
+        .fr-win-sym   {
+          font-size:3.5rem; margin:0.5rem 0; position:relative; z-index:2;
+          display: inline-block;
+          animation: symDance 1.8s ease-in-out infinite;
+        }
+        @keyframes symDance {
+          0%, 100% { transform: rotate(-8deg) scale(1) translateY(0); }
+          25%      { transform: rotate(8deg) scale(1.08) translateY(-4px); }
+          50%      { transform: rotate(-5deg) scale(1.12) translateY(-8px); }
+          75%      { transform: rotate(6deg) scale(1.08) translateY(-4px); }
+        }
+
+        .fr-win-name  { font-family:'Sora',sans-serif; font-size:2.2rem; font-weight:900; letter-spacing:-0.025em; margin-bottom:0.3rem; position:relative; z-index:2; }
+        .fr-win-party { font-size:0.95rem; opacity:0.8; font-weight:600; margin-bottom:1.25rem; position:relative; z-index:2; }
+        .fr-win-pill  {
+          display:inline-block; background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.35);
+          border-radius:999px; padding:0.55rem 1.5rem;
+          font-family:'Sora',sans-serif; font-size:1.05rem; font-weight:800; position:relative; z-index:2;
+        }
+
+        /* ── Falling confetti inside the winner banner ───────── */
+        .fr-confetti {
+          position: absolute; inset: 0; overflow: hidden;
+          pointer-events: none; z-index: 1;
+        }
+        .fr-confetti span {
+          position: absolute; top: -12%; font-size: 1.05rem;
+          animation-name: confettiFall;
+          animation-timing-function: linear;
+          animation-iteration-count: infinite;
+          opacity: 0;
+        }
+        @keyframes confettiFall {
+          0%   { transform: translateY(0) rotate(0deg); opacity: 0; }
+          8%   { opacity: 0.9; }
+          92%  { opacity: 0.9; }
+          100% { transform: translateY(260px) rotate(340deg); opacity: 0; }
+        }
+
+        .fr-sec-lbl {
+          display: flex; align-items: center; gap: 0.65rem;
+          font-family: 'Sora', sans-serif; font-size: 0.67rem; font-weight: 700;
+          letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-4);
+          margin-bottom: 0.875rem;
+        }
+        .fr-sec-lbl::after { content:''; flex:1; height:1px; background:var(--border); }
+
+        .fr-table-wrap {
+          overflow-x: auto; border-radius: 12px;
+          border: 1px solid var(--border); box-shadow: var(--shadow-sm);
+          margin-bottom: 1.75rem; -webkit-overflow-scrolling: touch;
+        }
+
+        .fr-table {
+          width: 100%; border-collapse: collapse;
+          font-size: 0.875rem; table-layout: auto;
+        }
+
+        .fr-table th, .fr-table td { padding: 0.9rem 1rem; vertical-align: middle; text-align: left; }
+        .fr-table th:nth-child(1), .fr-table td:nth-child(1) { text-align:center; width:48px; }
+        .fr-table th:nth-child(2), .fr-table td:nth-child(2) { text-align:center; width:60px; font-size:1.3rem; }
+        .fr-table th:nth-child(4), .fr-table td:nth-child(4) { text-align:right; font-family:'DM Mono',monospace; font-weight:700; white-space:nowrap; }
+        .fr-table th:nth-child(5), .fr-table td:nth-child(5) { text-align:right; font-weight:700; white-space:nowrap; width:64px; }
+        .fr-table th:nth-child(6), .fr-table td:nth-child(6) { min-width:90px; }
+
+        #overallResultsTable th:nth-child(6), #overallResultsTable td:nth-child(6) {
+          text-align:center; font-weight:700; white-space:nowrap; width:100px;
+        }
+        #overallResultsTable th:nth-child(7), #overallResultsTable td:nth-child(7) { min-width:90px; }
+
+        .fr-table thead tr { background: linear-gradient(135deg, #060E1F 0%, #1A3066 100%); }
+        .fr-table th {
+          font-family: 'Sora', sans-serif; font-size: 0.67rem; font-weight: 700;
+          letter-spacing: 0.09em; text-transform: uppercase;
+          color: rgba(255,255,255,0.7); white-space: nowrap;
+        }
+        .fr-table th:first-child { border-radius: 11px 0 0 0; }
+        .fr-table th:last-child  { border-radius: 0 11px 0 0; }
+
+        .fr-table td { border-bottom: 1px solid var(--border); color: var(--text-1); }
+        .fr-table tbody tr:last-child td { border-bottom: none; }
+        .fr-table tbody tr { transition: background 120ms; }
+        .fr-table tbody tr:hover td { background: var(--surface); }
+
+        .fr-win-row td { background: var(--leaf-50); color: var(--leaf-700); font-weight: 600; }
+        .fr-win-row:hover td { background: var(--leaf-100); }
+        [data-theme="dark"] .fr-win-row td { background: rgba(4,138,78,0.15); color: var(--leaf-300); }
+        [data-theme="dark"] .fr-win-row:hover td { background: rgba(4,138,78,0.22); }
+        [data-theme="dark"] .fr-table tbody tr:hover td { background: var(--surface-2); }
+
+        .fr-bar-track { height: 7px; background: var(--surface-2); border-radius: 999px; overflow: hidden; min-width: 80px; }
+        .fr-bar-fill {
+          height: 100%; border-radius: 999px;
+          background: linear-gradient(90deg, #1A3066, #4A6FA5);
+          animation: fillIn 1.2s cubic-bezier(0.22,1,0.36,1) both;
+        }
+        @keyframes fillIn { from{width:0 !important} }
+        .fr-win-row .fr-bar-fill { background: linear-gradient(90deg, var(--leaf-600), var(--leaf-300)); }
+
+        .fr-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.875rem; margin: 1.75rem 0; }
+        .fr-stat {
+          background: var(--surface); border: 1px solid var(--border);
+          border-radius: 12px; padding: 1.25rem; text-align: center;
+          transition: transform 150ms, box-shadow 200ms;
+        }
+        .fr-stat:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+        .fr-stat-num {
+          font-family: 'Sora', sans-serif; font-size: 2rem; font-weight: 900;
+          color: var(--ink); line-height: 1; letter-spacing: -0.03em; margin-bottom: 0.4rem;
+        }
+        .fr-stat-lbl {
+          font-family: 'Sora', sans-serif; font-size: 0.68rem; font-weight: 700;
+          text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-4);
+        }
+
+        .fr-ts {
+          display: flex; justify-content: space-between; align-items: center;
+          flex-wrap: wrap; gap: 0.5rem;
+          background: var(--surface); border: 1px solid var(--border);
+          border-radius: 10px; padding: 0.875rem 1.1rem; margin-bottom: 1.5rem;
+        }
+        .fr-ts-lbl { font-size: 0.8rem; color: var(--text-3); font-weight: 500; }
+        .fr-ts-val { font-family: 'DM Mono', monospace; font-size: 0.85rem; color: var(--navy-700); font-weight: 600; }
+
+        .fr-actions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+        .fr-btn {
+          display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem;
+          padding: 0.75rem 1.1rem; border-radius: 10px;
+          font-family: 'Sora', sans-serif; font-size: 0.85rem; font-weight: 700;
+          text-decoration: none; border: none; cursor: pointer;
+          transition: transform 150ms, box-shadow 200ms, background 150ms; white-space: nowrap;
+        }
+        .fr-btn-full { grid-column: 1 / -1; }
+        .fr-btn:active { transform: scale(0.97); }
+        .fr-btn-live {
+          background: linear-gradient(135deg, #1A3066, #060E1F);
+          color: #fff;
+          box-shadow: 0 4px 14px rgba(12,26,62,0.35);
+        }
+        .fr-btn-live:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 10px 28px rgba(12,26,62,0.45);
+        }
+        .fr-btn-primary { background: linear-gradient(135deg, #1A3066, #060E1F); color: #fff; box-shadow: 0 4px 14px rgba(12,26,62,0.35); }
+        .fr-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(12,26,62,0.45); }
+
+        .fr-btn-admin {
+          background: linear-gradient(135deg, #1A3066, #060E1F);
+          color: #fff;
+          box-shadow: 0 4px 14px rgba(12,26,62,0.35);
+          position: relative;
+        }
+        .fr-btn-admin::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border-radius: 10px;
+          padding: 1px;
+          background: linear-gradient(135deg, rgba(255,255,255,0.25), transparent 60%);
+          -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+          -webkit-mask-composite: xor;
+          mask-composite: exclude;
+          pointer-events: none;
+        }
+        .fr-btn-admin:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 10px 28px rgba(12,26,62,0.45);
+        }
+
+        .fr-foot {
+          margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--border);
+          text-align: center; font-size: 0.75rem; color: var(--text-4); line-height: 1.9;
+        }
+        .fr-foot strong { color: var(--text-3); }
+
+        .fr-ww-grid {
+          display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.875rem;
+          margin-bottom: 1.75rem;
+        }
+        .fr-ww-card {
+          background: var(--surface); border: 1px solid var(--border);
+          border-radius: 12px; padding: 1.1rem 1.25rem;
+          display: flex; align-items: center; gap: 0.9rem;
+          transition: transform 150ms, box-shadow 200ms;
+        }
+        .fr-ww-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+        .fr-ww-card.fr-ww-decided { border-color: rgba(4,138,78,0.3); background: var(--leaf-50); }
+        [data-theme="dark"] .fr-ww-card.fr-ww-decided { background: rgba(4,138,78,0.1); }
+        .fr-ww-card.fr-ww-empty { opacity: 0.7; }
+        .fr-ww-sym { font-size: 1.9rem; flex-shrink: 0; width: 2.2rem; text-align: center; }
+        .fr-ww-body { min-width: 0; flex: 1; }
+        .fr-ww-ward {
+          font-family: 'Sora', sans-serif; font-size: 0.68rem; font-weight: 700;
+          text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-4);
+          margin-bottom: 0.25rem;
+        }
+        .fr-ww-name {
+          font-family: 'Sora', sans-serif; font-size: 0.95rem; font-weight: 800;
+          color: var(--ink); line-height: 1.3; margin-bottom: 0.15rem;
+          overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .fr-ww-votes { font-family: 'DM Mono', monospace; font-size: 0.78rem; color: var(--text-3); }
+        .fr-ww-status {
+          font-family: 'Sora', sans-serif; font-size: 0.78rem; font-weight: 600;
+          color: var(--text-4); font-style: italic;
+        }
+        .fr-ww-tie-status { color: var(--gold-600); font-weight: 700; font-style: normal; }
+        .fr-ww-badge {
+          font-family: 'Sora', sans-serif; font-size: 0.6rem; font-weight: 700;
+          text-transform: uppercase; letter-spacing: 0.06em;
+          padding: 0.15rem 0.5rem; border-radius: 999px; flex-shrink: 0;
+        }
+        /* ── Winner badge does a little victory wiggle ───────── */
+        .fr-ww-badge.win  {
+          background: var(--leaf-600); color: #fff;
+          display: inline-block;
+          animation: badgeWiggle 1.6s ease-in-out infinite;
+        }
+        @keyframes badgeWiggle {
+          0%, 100% { transform: rotate(0deg) scale(1); }
+          20%      { transform: rotate(-9deg) scale(1.08); }
+          40%      { transform: rotate(9deg) scale(1.08); }
+          60%      { transform: rotate(-5deg) scale(1.02); }
+          80%      { transform: rotate(5deg) scale(1.02); }
+        }
+        .fr-ww-badge.tie  { background: var(--gold-500); color: #fff; }
+        .fr-ww-badge.none { background: var(--surface-2); color: var(--text-4); }
+
+        @media (max-width: 640px) {
+          .fr-body { padding: 2rem 1.25rem 1.75rem; }
+          .fr-title { font-size: 1.35rem; }
+          .fr-win-name { font-size: 1.65rem; }
+          .fr-stats { grid-template-columns: 1fr 1fr; }
+          .fr-stats .fr-stat:last-child { grid-column: span 2; }
+          .fr-ww-grid { grid-template-columns: 1fr; }
+
+        }
+        @media (prefers-reduced-motion: reduce) {
+          *, *::before, *::after { animation-duration:0.01ms !important; transition-duration:0.01ms !important; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="ec-header">
+    <div class="ec-left">
+        <div class="ec-emblem">⚖️</div>
+        <div class="ec-brand">
+            <span class="ec-brand-main">தேர்தல் ஆணையம் · Election Commission</span>
+            <span class="ec-brand-sub">Tamil Nadu Legislative Assembly Election — 2026</span>
+        </div>
+    </div>
+    <div class="ec-right">
+        <div class="flag-pill"><span class="fp-s"></span><span class="fp-w"></span><span class="fp-g"></span></div>
+        <span th:if="${!results.empty}" class="ec-chip">🏁 Officially Published</span>
+        <span th:if="${results.empty}" class="ec-chip">⏳ Awaiting Publication</span>
+    </div>
+</header>
+
+<div class="fr-scene" aria-hidden="true"></div>
+
+<div class="fr-wrap">
+    <div class="fr-container">
+        <div class="fr-card">
+            <div class="fr-stripe"></div>
+            <div class="fr-body">
+
+                <span class="fr-kicker">🏁 Official Declaration</span>
+                <h1 class="fr-title">Final Election Results</h1>
+                <p class="fr-sub">Overall Party Results — Verified &amp; Officially Published</p>
+
+                <div th:unless="${results.empty}" class="fr-alert-success">
+                    <span style="font-size:1rem;flex-shrink:0;">✅</span>
+                    <div>
+                        <strong>Results Officially Published</strong>
+                        Verified, certified, and declared by the Election Commission of Tamil Nadu.
+                    </div>
+                </div>
+
+                <div th:if="${results.empty}" class="fr-alert-info">
+                    <span style="font-size:1rem;flex-shrink:0;">ℹ️</span>
+                    <div>
+                        <strong>Results Pending</strong>
+                        Final results have not been published yet. Please check back after counting is complete.
+                    </div>
+                </div>
+
+                <div th:unless="${results.empty}">
+
+                    <div th:each="r : ${results}" th:if="${r.leading}" class="fr-winner">
+                        <!-- Confetti pieces — purely decorative, staggered timing/position -->
+                        <div class="fr-confetti" aria-hidden="true">
+                            <span style="left:6%;  animation-duration:2.6s; animation-delay:0s;">🎉</span>
+                            <span style="left:18%; animation-duration:3.1s; animation-delay:0.4s;">✨</span>
+                            <span style="left:30%; animation-duration:2.3s; animation-delay:0.9s;">🎊</span>
+                            <span style="left:44%; animation-duration:2.9s; animation-delay:0.2s;">⭐</span>
+                            <span style="left:58%; animation-duration:2.5s; animation-delay:1.1s;">🎉</span>
+                            <span style="left:70%; animation-duration:3.3s; animation-delay:0.6s;">✨</span>
+                            <span style="left:82%; animation-duration:2.4s; animation-delay:1.3s;">🎊</span>
+                            <span style="left:92%; animation-duration:2.8s; animation-delay:0.1s;">⭐</span>
+                        </div>
+
+                        <div class="fr-win-eye">🏆 &nbsp;Winning Party — Most Constituencies Won</div>
+                        <div class="fr-win-sym" th:text="${r.partySymbol ?: '🗳️'}">🗳️</div>
+                        <div class="fr-win-name" th:text="${r.partyName}">Party</div>
+                        <div class="fr-win-party">Total votes across all constituencies</div>
+                        <div class="fr-win-pill" th:text="${r.totalVotes + ' votes'}">0 votes</div>
+                        <div class="fr-wards-reveal" style="margin-top:0.75rem;font-size:0.85rem;opacity:0.85;position:relative;z-index:2;"
+                             th:text="${r.wardsWon + ' of ' + totalWards + ' constituencies won'}">0 of 0 constituencies won</div>
+                    </div>
+
+                    <div class="fr-sec-lbl">Overall Party Totals — All Constituencies</div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin:-0.6rem 0 0.875rem;flex-wrap:wrap;gap:0.5rem;">
+                        <p style="font-size:0.8rem;color:var(--text-3);margin:0;">
+                            Ranked by number of constituencies won. A constituency is won by the party with the strict
+                            highest vote count there; a tie within a constituency counts toward no one.
+                        </p>
+                    </div>
+
+                    <div class="fr-table-wrap">
+                        <table class="fr-table" id="overallResultsTable">
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Symbol</th>
+                                <th>Party</th>
+                                <th>Total Votes</th>
+                                <th>Share</th>
+                                <th>Constituencies Won</th>
+                                <th>Progress</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="r, stat : ${results}"
+                                th:classappend="${r.leading} ? 'fr-win-row' : ''">
+                                <td>
+                                    <span th:if="${r.leading}">🏆</span>
+                                    <span th:unless="${r.leading}"
+                                          style="font-weight:700;color:var(--text-4);"
+                                          th:text="${stat.count}">1</span>
+                                </td>
+                                <td th:text="${r.partySymbol ?: '🗳️'}">🗳️</td>
+                                <td>
+                                    <div style="font-weight:700;font-family:'Sora',sans-serif;"
+                                         th:text="${r.partyName}">Party</div>
+                                </td>
+                                <td th:text="${r.totalVotes}">0</td>
+                                <td th:text="${r.totalVotes > 0 and #aggregates.sum(results.![totalVotes]) > 0
+            ? #numbers.formatDecimal(r.totalVotes * 100.0 / #aggregates.sum(results.![totalVotes]), 1, 1) + '%'
+            : '0%'}">0%</td>
+                                <td>
+                                    <span th:text="${r.wardsWon + ' of ' + totalWards + ' constituencies'}">0 of 0 constituencies</span>
+                                </td>
+                                <td>
+                                    <div class="fr-bar-track">
+                                        <div class="fr-bar-fill"
+                                             th:style="${totalWards > 0}
+                    ? 'width: ' + ${r.wardsWon * 100 / totalWards} + '%'
+                    : 'width: 0%'"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="fr-stats">
+                        <div class="fr-stat">
+                            <div class="fr-stat-num" th:text="${totalWards}">0</div>
+                            <div class="fr-stat-lbl">Total Constituencies</div>
+                        </div>
+                        <div class="fr-stat">
+                            <div class="fr-stat-num" th:text="${#aggregates.sum(results.![totalVotes])}">0</div>
+                            <div class="fr-stat-lbl">Total Votes Cast</div>
+                        </div>
+                        <div class="fr-stat">
+                            <div class="fr-stat-num" style="font-size:1.5rem;">✓</div>
+                            <div class="fr-stat-lbl">Verified &amp; Certified</div>
+                        </div>
+                    </div>
+
+                    <div class="fr-sec-lbl" style="margin-top:1.75rem;">Constituency Winners</div>
+                    <p style="font-size:0.8rem;color:var(--text-3);margin:-0.4rem 0 1rem;">
+                        Winner is the candidate with the highest votes in that constituency. Constituencies with zero
+                        votes cast show no winner; constituencies where the top two are tied show no winner either.
+                    </p>
+
+                    <div class="fr-ww-grid">
+                        <div th:each="entry : ${wardResults}"
+                             th:with="top=${entry.value[0]},
+                                      wardTotal=${#aggregates.sum(entry.value.![totalVotes])},
+                                      isTie=${entry.value.size() > 1 and entry.value[1].totalVotes == top.totalVotes and top.totalVotes > 0}"
+                             th:classappend="${wardTotal == 0 or isTie} ? ' fr-ww-empty' : ' fr-ww-decided'"
+                             class="fr-ww-card">
+
+                            <div class="fr-ww-sym" th:text="${wardTotal == 0 or isTie} ? '—' : (${top.partySymbol} ?: '🗳️')">🗳️</div>
+
+                            <div class="fr-ww-body">
+                                <div class="fr-ww-ward" th:text="${entry.key}">Constituency Name</div>
+
+                                <div th:if="${wardTotal == 0}">
+                                    <div class="fr-ww-status">No votes cast</div>
+                                </div>
+
+                                <div th:if="${wardTotal > 0 and isTie}">
+                                    <div class="fr-ww-name fr-ww-tie-status" th:text="${top.totalVotes + ' votes each — tied'}">Tied</div>
+                                    <div class="fr-ww-status fr-ww-tie-status">No winner declared</div>
+                                </div>
+
+                                <div th:if="${wardTotal > 0 and !isTie}">
+                                    <div class="fr-ww-name" th:text="${top.partyName}">Party</div>
+                                    <div class="fr-ww-votes" th:text="${top.totalVotes + ' of ' + wardTotal + ' votes'}">0 of 0 votes</div>
+                                </div>
+                            </div>
+
+                            <span th:if="${wardTotal == 0}" class="fr-ww-badge none">No Votes</span>
+                            <span th:if="${wardTotal > 0 and isTie}" class="fr-ww-badge tie">Tied</span>
+                            <span th:if="${wardTotal > 0 and !isTie}" class="fr-ww-badge win">🏆 Won</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="fr-ts">
+                    <span class="fr-ts-lbl">Results published on:</span>
+                    <span class="fr-ts-val"
+                          th:text="${#dates.format(new java.util.Date(), 'dd-MM-yyyy HH:mm:ss') + ' IST'}">—</span>
+                </div>
+
+                <div class="fr-actions">
+                    <a th:href="@{/voter/login}" class="fr-btn fr-btn-primary fr-btn-full">Voter Portal</a>
+                    <a th:href="@{/live-results}" class="fr-btn fr-btn-live">Live Results</a>
+                    <a th:href="@{/admin/dashboard}" class="fr-btn fr-btn-admin">Admin Dashboard</a>
+                </div>
+
+                <div class="fr-foot">
+                    Results are final and binding &nbsp;·&nbsp;
+                    Election Commission of Tamil Nadu &nbsp;·&nbsp;
+                    📞 <strong>1950</strong>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/ui-features.js}"></script>
+</body>
+</html>

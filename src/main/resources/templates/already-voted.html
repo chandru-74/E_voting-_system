@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Already Voted — Tamil Nadu E-Voting</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800;900&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body { font-family: 'DM Sans', sans-serif; background: #fdfaf0; min-height: 100vh; }
+
+    .vs-scene {
+        position: fixed; inset: 0; pointer-events: none; z-index: 0;
+        background:
+            radial-gradient(ellipse 60% 45% at 12% 10%, rgba(200,150,12,0.08) 0%, transparent 68%),
+            radial-gradient(ellipse 55% 40% at 90% 90%, rgba(180,120,10,0.06) 0%, transparent 68%);
+    }
+
+    .vs-wrap {
+        position: relative; z-index: 1;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        min-height: 100vh; padding: 2.5rem 1rem 4rem;
+    }
+
+    .vs-card {
+        width: 100%; max-width: 480px;
+        background: #fff;
+        border: 1px solid rgba(120,90,10,0.15);
+        border-radius: 18px;
+        box-shadow: 0 26px 64px rgba(120,90,10,0.14), 0 8px 22px rgba(120,90,10,0.08);
+        overflow: hidden;
+        animation: cardIn 520ms cubic-bezier(0.22,1,0.36,1) both;
+    }
+    @keyframes cardIn {
+        from { opacity:0; transform:translateY(26px) scale(0.98); }
+        to   { opacity:1; transform:translateY(0) scale(1); }
+    }
+
+    .vs-stripe {
+        height: 5px;
+        background: repeating-linear-gradient(135deg, #C8960C 0 10px, #E5B325 10px 20px);
+    }
+
+    .vs-top { padding: 2.4rem 2.25rem 1.75rem; text-align: center; }
+
+    .vs-check-ring {
+        width: 68px; height: 68px; border-radius: 50%; margin: 0 auto 1.25rem;
+        background: linear-gradient(135deg, #C8960C, #92610A);
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 0 0 7px rgba(200,150,12,0.14), 0 6px 18px rgba(146,97,10,0.3);
+        animation: popIn 460ms 150ms cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    @keyframes popIn { from { opacity:0; transform:scale(0.4); } to { opacity:1; transform:scale(1); } }
+    .vs-check-ring svg { width:30px; height:30px; }
+
+    .vs-title { font-family:'Sora',sans-serif; font-size:1.45rem; font-weight:800; color:#4a3600; letter-spacing:-0.02em; margin-bottom:0.35rem; }
+    .vs-sub { font-size:0.875rem; color:#8a7248; line-height:1.6; max-width:340px; margin:0 auto; }
+
+    .vs-perf {
+        position: relative; height: 1px; background: repeating-linear-gradient(90deg, #e5d9b8 0 8px, transparent 8px 16px);
+        margin: 0 2.25rem;
+    }
+    .vs-perf::before, .vs-perf::after {
+        content:''; position:absolute; top:-11px; width:22px; height:22px; border-radius:50%;
+        background:#fdfaf0; border:1px solid rgba(120,90,10,0.15);
+    }
+    .vs-perf::before { left:-33px; }
+    .vs-perf::after  { right:-33px; }
+
+    .vs-body { padding: 1.75rem 2.25rem 2.25rem; }
+
+    /* Slip notice — replaces the old on-page Voter ID box. The Voter
+       ID itself now lives ONLY inside the printable slip below,
+       consistent with vote-recorded.html's approach. */
+    .vs-slip-notice {
+        display: flex; gap: 0.7rem; align-items: flex-start;
+        background: linear-gradient(135deg, #FEF9E7, #FDF3D3);
+        border: 1px solid rgba(200,150,12,0.28);
+        border-radius: 12px; padding: 1rem 1.15rem; margin-bottom: 1.5rem;
+    }
+    .vs-slip-notice-head { font-family:'Sora',sans-serif; font-size:0.85rem; font-weight:800; color:#4a3600; margin-bottom:0.25rem; }
+    .vs-slip-notice p { font-size: 0.8rem; color:#8a7248; line-height:1.55; }
+
+    .vs-info-rows { margin-bottom: 1.5rem; }
+    .vs-info-row {
+        display:flex; justify-content:space-between; align-items:center;
+        padding: 0.7rem 0; border-bottom: 1px dashed #e5d9b8;
+        font-size: 0.85rem;
+    }
+    .vs-info-row:last-child { border-bottom:none; }
+    .vs-info-k { color:#8a7248; }
+    .vs-info-v { font-weight:700; color:#4a3600; font-family:'Sora',sans-serif; text-align:right; }
+
+    .vs-notice {
+        display:flex; gap:0.65rem; align-items:flex-start;
+        background: rgba(200,150,12,0.08); border:1px solid rgba(200,150,12,0.22);
+        border-radius: 10px; padding: 0.85rem 1rem; margin-bottom: 1.5rem;
+        font-size: 0.8rem; color:#6b4a10; line-height:1.55;
+    }
+
+    .vs-actions { display:flex; gap:0.7rem; flex-wrap:wrap; }
+    .vs-btn-results {
+        flex:1; min-width:140px;
+        display:flex; align-items:center; justify-content:center; gap:0.5rem;
+        padding:0.8rem 1.1rem; background: linear-gradient(135deg, #C8960C, #92610A);
+        color:#fff; border:none; border-radius:10px;
+        font-family:'Sora',sans-serif; font-size:0.83rem; font-weight:700;
+        text-decoration:none; cursor:pointer;
+        box-shadow: 0 4px 14px rgba(146,97,10,0.3);
+        transition: transform 140ms, box-shadow 180ms;
+    }
+    .vs-btn-results:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(146,97,10,0.38); }
+    .vs-btn-logout { flex:1; min-width:140px; margin:0; }
+    .vs-btn-logout-inner {
+        width:100%; padding:0.8rem 1.1rem; background:#fff; color:#4a3600;
+        border:1px solid #e5d9b8; border-radius:10px;
+        font-family:'Sora',sans-serif; font-size:0.83rem; font-weight:700; cursor:pointer;
+        transition: background 140ms, border-color 140ms;
+    }
+    .vs-btn-logout-inner:hover { background:#fdfaf0; border-color:#C8960C; }
+    .vs-btn-slip {
+        flex-basis: 100%;
+        display:flex; align-items:center; justify-content:center; gap:0.5rem;
+        padding: 0.8rem 1.1rem; background:#fff; color:#92610A;
+        border: 1.5px dashed #C8960C; border-radius: 10px;
+        font-family:'Sora',sans-serif; font-size:0.83rem; font-weight:700; cursor:pointer;
+        transition: background 140ms, border-color 140ms;
+    }
+    .vs-btn-slip:hover { background:#FEF9E7; }
+
+    .vs-foot {
+        margin-top:1.5rem; padding-top:1.1rem; border-top:1px solid #eee2c2;
+        text-align:center; font-size:0.72rem; color:#a89665; line-height:1.9;
+    }
+
+    @media (max-width: 560px) {
+        .vs-top, .vs-body { padding-left:1.4rem; padding-right:1.4rem; }
+        .vs-perf { margin:0 1.4rem; }
+        .vs-title { font-size:1.25rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { animation-duration:0.01ms !important; }
+    }
+
+    /* ── Printable slip (matches vote-recorded.html's approach) ── */
+    .vs-print-slip { display: none; }
+    @media print {
+        body * { visibility: hidden; }
+        .vs-print-slip, .vs-print-slip * { visibility: visible; }
+        .vs-print-slip { display: block; position: absolute; top: 0; left: 0; width: 100%; padding: 2rem; font-family: 'DM Sans', sans-serif; }
+        .ps-header { text-align: center; border-bottom: 2px solid #92610A; padding-bottom: 1rem; margin-bottom: 1.5rem; }
+        .ps-header h2 { font-family: 'Sora', sans-serif; font-size: 1.3rem; margin-bottom: 0.25rem; }
+        .ps-row { display: flex; justify-content: space-between; padding: 0.6rem 0; border-bottom: 1px dashed #ccc; font-size: 0.9rem; }
+        .ps-row strong { color: #4a3600; }
+        .ps-id-box { margin-top: 1rem; padding: 1rem; border: 1.5px solid #92610A; border-radius: 6px; text-align: center; }
+        .ps-id-box .ps-id-lbl { font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: #555; margin-bottom: 0.4rem; }
+        .ps-id-box .ps-id-val { font-family: 'DM Mono', monospace; font-size: 1.15rem; font-weight: 700; color: #4a3600; letter-spacing: 0.03em; }
+        .ps-footer { margin-top: 1.5rem; text-align: center; font-size: 0.75rem; color: #555; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="ec-header">
+  <div class="ec-left">
+    <div class="ec-emblem">⚖️</div>
+    <div class="ec-brand">
+      <span class="ec-brand-main">தேர்தல் ஆணையம் · Election Commission</span>
+      <span class="ec-brand-sub">Tamil Nadu Legislative Assembly Election — 2026</span>
+    </div>
+  </div>
+  <div class="ec-right">
+    <div class="flag-pill"><span class="fp-s"></span><span class="fp-w"></span><span class="fp-g"></span></div>
+  </div>
+</header>
+
+<div class="vs-scene" aria-hidden="true"></div>
+
+<div class="vs-wrap">
+  <div class="vs-card">
+    <div class="vs-stripe"></div>
+
+    <div class="vs-top">
+      <div class="vs-check-ring">
+        <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M8 18.5L14.5 25L28 11" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h1 class="vs-title">You've Already Voted</h1>
+      <p class="vs-sub">Our records show your vote for this election has already been recorded and counted.</p>
+    </div>
+
+    <div class="vs-perf"></div>
+
+    <div class="vs-body">
+
+      <!-- Voter ID is NOT shown here on the page — only inside the
+           printable slip below, matching vote-recorded.html. -->
+      <div class="vs-slip-notice">
+        <span style="font-size:1.1rem;flex-shrink:0;">🧾</span>
+        <div>
+          <div class="vs-slip-notice-head">Your Voter ID is on your slip</div>
+          <p>Download your Vote Slip below any time to view or reprint your Voter ID.</p>
+        </div>
+      </div>
+
+      <div class="vs-info-rows">
+        <div class="vs-info-row">
+          <span class="vs-info-k">Status</span>
+          <span class="vs-info-v" style="color:#15803d;">✓ Confirmed &amp; Recorded</span>
+        </div>
+        <div class="vs-info-row" th:if="${voter != null and voter.votedAt != null}">
+          <span class="vs-info-k">Voted On</span>
+          <span class="vs-info-v" th:text="${#temporals.format(voter.votedAt, 'dd MMM yyyy, hh:mm a')}">—</span>
+        </div>
+      </div>
+
+      <div class="vs-notice">
+        <span style="flex-shrink:0;">🏛️</span>
+        <span>Each registered voter may vote only once. If you believe this is an error, contact the Election Commission helpline below.</span>
+      </div>
+
+      <div class="vs-actions">
+        <a th:href="@{/voter/results}" class="vs-btn-results">📊 Live Results</a>
+
+        <!-- CHANGED: was a POST /voter/logout form with a CSRF hidden
+             input. Now it's a plain GET link to the homepage, so no
+             CSRF token is needed — CSRF protection only applies to
+             state-changing requests (POST/PUT/DELETE), and navigating
+             home doesn't change anything on the server. -->
+        <div class="vs-btn-logout">
+          <a th:href="@{/}" class="vs-btn-logout-inner" style="display:block;text-align:center;text-decoration:none;">🏠 Home</a>
+        </div>
+
+        <button type="button" class="vs-btn-slip" onclick="window.print()">
+          🖨️ Download Vote Slip (PDF)
+        </button>
+      </div>
+
+      <div class="vs-foot">
+        🇮🇳 Thank you for participating in the democratic process!<br/>
+        Election Commission of Tamil Nadu &nbsp;·&nbsp; Helpline: <strong>1950</strong>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Printable slip — only visible via window.print(). Voter ID lives
+     only here, computed from voter.id the same way vote-recorded.html
+     formats it (TN-VOTER-000123). -->
+<div class="vs-print-slip">
+  <div class="ps-header">
+    <h2>Tamil Nadu E-Voting — Vote Proof Slip</h2>
+    <p>Election Commission of Tamil Nadu · Legislative Assembly Election 2026</p>
+  </div>
+  <div class="ps-row"><span>Vote Status</span><strong>✓ Confirmed &amp; Recorded</strong></div>
+  <div class="ps-id-box">
+    <div class="ps-id-lbl">Voter ID</div>
+    <div class="ps-id-val"
+         th:text="${voter != null ? 'TN-VOTER-' + #numbers.formatInteger(voter.id, 6) : '—'}">TN-VOTER-000000</div>
+  </div>
+  <div style="text-align:center;font-size:0.78rem;color:#666;margin-top:0.6rem;letter-spacing:0.02em;">Tamil Nadu Legislative Assembly Election — 2026</div>
+  <div class="ps-footer">
+    This slip proves your vote was recorded. It does not reveal your choice.<br/>
+    Keep this for your records. Helpline: 1950
+  </div>
+</div>
+
+</body>
+</html>
